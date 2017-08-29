@@ -1,0 +1,51 @@
+{
+  "name": "datavizable",
+  "version": "0.1.0",
+  "description": "Authoring tool for accessible data visualizations",
+  "main": "main.js",
+  "keywords": [
+    "vega",
+    "editor",
+    "visualization",
+    "a11y",
+    "accessibility",
+    "interaction",
+    "d3"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jcdyer/datavizable.git"
+  },
+  "author": {
+    "name": "Open Access Technologies",
+    "url": "https://openaccesstech.com"
+  },
+  "contributors": [
+    {
+      "name": "Doug Schepers",
+      "url": "https://schepers.cc"
+    },
+    {
+      "name": "J. Cliff Dyer",
+      "url": "https://harkablog.com"
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "electron": "^1.6.11"
+  },
+  "devDependencies": {
+    "mocha": "^3.4.2",
+    "xmldom": "^0.1.27"
+    "electron": "^1.6.11"
+  },
+  "scripts": {
+    "deploy": "scripts/deploy.sh",
+    "prevendor": "npm install",
+    "vendor": "scripts/vendor.sh",
+    "prestart": "tsc -p .",
+    "start": "electron .",
+    "pretest": "tsc -p .",
+    "test": "mocha tests"
+  }
+}
