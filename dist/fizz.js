@@ -10,6 +10,11 @@ function match_id( obj ) {
   return obj.id === this;
 }
 
+function match_treeitem( obj ) { 
+  return obj.tree_item.element === this;
+}
+
+
 function generate_unique_id( base_id ) {
   var i = 0;
   var uid = base_id + "-" + i;
@@ -57,7 +62,7 @@ function update_link( event ) {
   var target_id = target_el.id;
 
   if ( "title-input" == target_id ) {
-    var link_target_value = document.querySelector("input[name='link_target']:checked").value;
+    var link_target_value = document.querySelector("input[name=link_target]:checked").value;
     draw.add_link( target_el.value, link_target_value );
   } else {
     var link_input_el = document.getElementById( "link-url-input" );
@@ -162,8 +167,8 @@ function fizz( svgroot ) {
   };
 
   this.default_style = {
-    "fill": "yellow",
-    "stroke": "blue",
+    "fill": "#ffff33",
+    "stroke": "#377eb8",
     "stroke-width": "1px"
   };
 
@@ -234,25 +239,28 @@ fizz.prototype.init = function () {
   this.root.addEventListener("mouseup", bind(this, this.drop), false );
   this.root.parentNode.addEventListener("input", bind(this, this.handle_text_input), false );
 
+  this.treeview.addEventListener("keyup", bind(this, this.handle_keys), false );
+  this.treeview.addEventListener("keydown", bind(this, this.handle_keys), false );
+
   this.buttons = document.querySelectorAll("button");
   for (var b = 0, bLen = this.buttons.length; bLen > b; ++b) {
     var eachButton = this.buttons[b];
     eachButton.addEventListener("click", bind(this, this.handle_buttons), false );
   }
 
-  this.listboxes = document.querySelectorAll("[role='listbox']");
+  this.listboxes = document.querySelectorAll("[role=listbox]");
   for (var l = 0, lLen = this.listboxes.length; lLen > l; ++l) {
     var eachListbox = this.listboxes[l];
     eachListbox.addEventListener("click", bind(this, this.handle_dropdown), false );
   }
 
-  this.pickers = document.querySelectorAll("[role='radio']");
+  this.pickers = document.querySelectorAll("[role=picker]");
   for (var l = 0, lLen = this.pickers.length; lLen > l; ++l) {
     var each_picker = this.pickers[l];
     each_picker.addEventListener("click", bind(this, this.handle_picker), false );
   }
 
-  this.inputs = document.querySelectorAll("input[type='number']");
+  this.inputs = document.querySelectorAll("input[type=number]");
   for (var i = 0, iLen = this.inputs.length; iLen > i; ++i) {
     var eachInput = this.inputs[i];
     eachInput.addEventListener("click", bind(this, this.handle_inputs), false );
@@ -1324,7 +1332,7 @@ fizz.prototype.handle_buttons = function (event) {
 
 fizz.prototype.handle_dropdown = function (event) {
   var target = event.target;
-  var options = target.parentNode.querySelectorAll("[role='option']")
+  var options = target.parentNode.querySelectorAll("[role=option]")
   for (var o = 0, oLen = options.length; oLen > o; ++o) {
     var eachOption = options[o];
     eachOption.setAttribute("aria-selected", "false" );
@@ -1343,7 +1351,7 @@ fizz.prototype.handle_dropdown = function (event) {
 fizz.prototype.handle_picker = function (event) {
   var target = event.target;
   var value = target.textContent;
-  var options = target.parentNode.querySelectorAll("[role='option']")
+  var options = target.parentNode.querySelectorAll("[role=option]")
   for (var o = 0, oLen = options.length; oLen > o; ++o) {
     var eachOption = options[o];
     eachOption.setAttribute("aria-selected", "false" );
@@ -1352,6 +1360,10 @@ fizz.prototype.handle_picker = function (event) {
   var prop = target.parentNode.getAttribute("data-property");
   if ( prop ) {
     this.active_style[prop] = value;
+
+    if ( this.selected_el ) {
+      this.selected_el.setAttribute("style", this.get_style(this.active_style) );
+    }
   } else {
     var datatype = target.parentNode.getAttribute("data-type");
     this.values[datatype] = value;
@@ -1393,6 +1405,34 @@ fizz.prototype.handle_pane_switch = function (event) {
   this.deactivate_nodes();
 }
 
+fizz.prototype.handle_keys = function (event) {
+  // console.info("handle_keys");
+  var target = event.target;
+  if ( "Enter" === event.key ) {
+    event.preventDefault();
+    target.blur();
+    // console.info(target, target.parentNode);
+
+    // update related element with new value
+    var tree_item = this.treeview.firstElementChild;
+    while ( false === tree_item.contains( target ) ) {
+      tree_item = tree_item.nextElementSibling;
+    }
+
+    if ( tree_item ) {
+      this.active_obj = this.elements.find( match_treeitem, tree_item );
+      // console.info(this.active_obj);
+
+      if (this.active_obj) {
+        var attr = target.parentNode.querySelector("b").textContent.split(":")[0];
+        var attr_value = target.textContent;
+        this.active_obj.element.setAttribute(attr, attr_value);
+      }
+    }
+  }
+
+}
+
 fizz.prototype.handle_inputs = function (event) {
   var target = event.target;
   var prop = target.getAttribute("data-property");
@@ -1406,6 +1446,10 @@ fizz.prototype.handle_inputs = function (event) {
 
   if ( !scope || "shape" == scope ) {
     this.active_style[prop] = val;
+
+    if ( this.selected_el ) {
+      this.selected_el.setAttribute("style", this.get_style(this.active_style) );
+    }
   } else if ( "text" == scope ) {
     this.active_text_style[prop] = val;
   }
@@ -1473,19 +1517,20 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
           var list_item = document.createElement("li");
           // list_item.textContent = item.name + ": " + item.value;
 
-          var name = document.createElement("b");
-          name.textContent = item.name + ": ";
-          list_item.appendChild( name );
+          var name_el = document.createElement("b");
+          name_el.setAttribute( "class", "attribute" );
+          name_el.textContent = item.name + ": ";
+          list_item.appendChild( name_el );
 
-          var value = document.createElement("span");
-          value.setAttribute( "contenteditable",  "true" );
+          var value_el = document.createElement("span");
+          value_el.setAttribute( "contenteditable",  "true" );
           var value_string = item.value;
           if (0 == value_string.indexOf("data:image/")) {
             value_string = "(dataURL)";
           }
-          value.textContent = value_string;
+          value_el.textContent = value_string;
           // var value = document.createTextNode( item.value );
-          list_item.appendChild( value );
+          list_item.appendChild( value_el );
 
           list.appendChild( list_item );
           // console.log(item.name + ": " + item.value);
