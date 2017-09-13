@@ -24,80 +24,7 @@ window.onload = function() {
   var svgroot = document.getElementById("fizz");
   draw = new fizz(svgroot);
   draw.init();
-
-  var file_input = document.getElementById("file_input");
-  var fileDisplayArea = document.getElementById("fileDisplayArea");
-
-  file_input.addEventListener("change", function(e) {
-    var file = file_input.files[0];
-    var imageType = /image.* /;
-
-    // if (file.type.match(imageType)) {
-      filename = file.name;
-      var reader = new FileReader();
-
-      reader.onload = function(e) {
-        var fileSize = (this.file.size ? this.byteSized( this.file.size ) : "n/a");
-        var lastMod = (this.file.lastModifiedDate ? this.file.lastModifiedDate.toLocaleDateString() : "n/a");
-        setFileInfo( this.file.name, fileSize, lastMod );
-
-        // // fileDisplayArea.innerHTML = "";
-
-        // var img = new Image();
-        // img.src = reader.result;
-        // // console.log( img.width + " x " + img.height);
-        // var w = document.getElementById("width");
-        // w.value = img.width;            
-
-        // var h = document.getElementById("height");
-        // h.value = img.height;
-
-
-        // var svgroot = document.getElementById("eyescribe");
-        // svgroot.setAttribute( "viewBox", "0 0 " + img.width + " " + img.height );
-
-        // fileDisplayArea.appendChild(img);
-          // console.log( reader );
-
-        // var imageEl = document.getElementById("source-image");
-        // imageEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", reader.result);
-        // imageEl.setAttribute( "width",  img.width );
-        // imageEl.setAttribute( "height", img.height );
-      }
-
-    //   reader.readAsDataURL(file); 
-    // } else {
-    //   fileDisplayArea.innerHTML = "File not supported!"
-    // }
-  });
-/*
-
-  var download_controls = document.getElementById( "download-controls" );
-  download_controls.addEventListener("mouseover", createSave_link, false);
-
-  // <input type="text" onkeypress="document.getElementById("example").innerHTML=this.value;" name="whatever" />
-
-  var title_input_el = document.getElementById( "title-input" );
-  title_input_el.addEventListener("keyup", update_text, false);
-
-  var desc_input_el = document.getElementById( "desc-input" );
-  desc_input_el.addEventListener("keyup", update_link, false);
-
-
-  var link_input_el = document.getElementById( "link-url-input" );
-  link_input_el.addEventListener("keyup", update_link, false);
-
-  // var link_target_el = document.getElementById( "link_target" );
-  // link_target_el.addEventListener("keyup", update_text, false);
-  var radios = document.getElementsByName("link_target");
-  for (var r = 0, r_len = radios.length; r_len > r; ++r) {
-    var eachRadio = radios[r];
-    eachRadio.addEventListener("click", update_link, false );
-  }
-
-*/
 }
-
 
 function update_text( event ) {
   // console.log( event.target.value );
@@ -215,6 +142,15 @@ function fizz( svgroot ) {
   this.pane_switch_buttons = null;
   this.panes = null;
 
+  // file upload variables
+
+  this.file = null;
+  this.file_type = null;
+  this.file_reader = null;  
+  this.file_input_button = document.getElementById( "file_input" );
+  this.file_save_button = document.getElementById( "file_save_button" );
+
+  // coordinate variables
   this.coords = this.root.createSVGPoint();
   this.originpoint = this.root.createSVGPoint();
 
@@ -322,6 +258,8 @@ fizz.prototype.init = function () {
     eachInput.addEventListener("click", bind(this, this.handle_inputs), false );
   }
 
+  this.file_input_button.addEventListener("change", bind(this, this.upload_file), false);
+  this.file_save_button.addEventListener("click", bind(this, this.save_file), false);
 
   this.panes = document.querySelectorAll("[role=region]");
   this.pane_switch = document.querySelector("#pane_switch");
@@ -337,6 +275,103 @@ fizz.prototype.init = function () {
     // this.selected_el.classList.remove("selected");
     
 }
+
+
+/*
+// upload file
+*/
+fizz.prototype.upload_file = function (event) {
+  this.file = event.target.files[0]; // FileList object
+
+  this.file_reader = new FileReader();
+
+  if (this.file) {
+    console.info(this.file)
+    if ("image/svg+xml" == this.file.type) {
+      this.file_reader.readAsText(this.file);
+      this.file_reader.addEventListener("load", bind(this, this.insert_svg), false);
+    } else {
+      this.file_reader.readAsDataURL( this.file );
+      this.file_reader.addEventListener("load", bind(this, this.insert_raster), false);
+    }
+  }
+}
+
+fizz.prototype.insert_raster = function () {
+  console.info("insert_raster", this.file_reader)
+  // console.info("insert_raster", this.file.name)
+
+  var dataURL = this.file_reader.result
+  this.active_el = document.createElementNS(this.svgns, "image");
+  this.active_el.setAttributeNS(this.xlinkns, "href", dataURL);
+
+  var id = this.file.name.split(".")[0];
+
+  this.add_element( this.active_el, id );
+
+
+  // this.canvas.appendChild( image_el );
+}
+
+fizz.prototype.insert_svg = function () {
+  console.info("insert_svg", this.file_reader)
+  
+  var file_content = this.file_reader.result;
+
+  // strip off XML prolog 
+  var svg_start = file_content.indexOf("<svg");
+  var prolog = file_content.substring(0, (svg_start - 1));
+  file_content = file_content.substring( svg_start );
+
+  // insert SVG file into HTML page
+  this.canvas.innerHTML = file_content;
+
+  
+//     this.lang = "en-US";
+//     var langAttr = this.svgroot.getAttribute("lang");
+//     if (langAttr) {
+//       this.lang = langAttr;
+//     }
+
+}
+
+
+fizz.prototype.save_file = function () {
+  var content = new XMLSerializer().serializeToString( this.canvas );
+
+  var filename_input = document.querySelector("#filename_input");
+  var filetype_input = document.querySelector("#filetype_input");
+  var filetype_option = filetype_input.options[ filetype_input.selectedIndex ];
+  var filetype = filetype_option.value;
+  var file_extension = filetype_option.text;
+
+  var filename = filename_input.value + file_extension;
+  var file_save_section = document.querySelector("#file_save");
+
+
+  var DOMURL = self.URL || self.webkitURL || self;
+  var blob = new Blob([content], {type : "image/svg+xml;charset=utf-8"});
+  var url = DOMURL.createObjectURL(blob);
+
+  var a_el = document.createElement("a");
+  a_el.style = "display: none";
+  file_save_section.appendChild(a_el);
+  a_el.download = filename;
+
+  if ( "image/svg+xml" == filetype ) {
+    a_el.href = url;
+  } else if ( "image/png" == filetype ) {
+
+  } else {
+
+  }
+
+  a_el.click();
+
+  DOMURL.revokeObjectURL(url);
+  a_el.remove();
+}
+
 
 
 /*
@@ -596,7 +631,7 @@ fizz.prototype.draw_connector = function () {
     if ( !start_node ) {
       // no starting node to attach to
       console.info("no nodes to attach!")
-      this.erase_element( this.active_el );
+      this.delete_element( this.active_el );
       this.reset();
     }
   }
@@ -679,16 +714,16 @@ fizz.prototype.grab = function (event) {
       this.draw( event );
     } else if ( "drag" == this.mode 
       || "copy" == this.mode 
-      || "erase" == this.mode 
+      || "delete" == this.mode 
       || "select" == this.mode 
       || "animate" == this.mode ) {
       // stop native drag-n-drop
       event.preventDefault();
       event.stopPropagation();
 
-      // only grab things in drawing area
-      if ( this.canvas == event.target.parentNode ) {
-        var target = event.target;
+      // only grab things in drawing area 
+      var target = event.target;
+      if ( this.canvas.contains( target ) ) {
         if (this.backdrop != target) {
           this.active_el = target;
 
@@ -734,7 +769,6 @@ fizz.prototype.grab = function (event) {
       }
     } else if ( -1 != this.mode.indexOf("layout-") ) {
       console.log("layout: " + this.mode)
-      var target = event.target;
       switch (this.mode) {
         case "layout-path":
           if (this.backdrop != target) {
@@ -954,9 +988,9 @@ fizz.prototype.drop = function (event) {
 
     // TODO: convert transform into geometry attributes(optionally)
 
-  } else if ( "erase" == this.mode ) {
+  } else if ( "delete" == this.mode ) {
     if ( this.active_el ) {
-      this.erase_element( this.active_el );
+      this.delete_element( this.active_el );
     }
   } else if ( "animate" == this.mode ) {
     this.animate();
@@ -988,7 +1022,7 @@ fizz.prototype.end_draw = function (event) {
   // this.points = null;
 }
 
-fizz.prototype.erase_element = function ( el ) {
+fizz.prototype.delete_element = function ( el ) {
   var target_obj = this.elements.find( match_element, el );
   if ( target_obj ) {
     var tree_item = target_obj.tree_item.element;
@@ -1044,14 +1078,20 @@ fizz.prototype.handle_text_input = function ( event ) {
 
 
 /* Element Manager */
-fizz.prototype.add_element = function ( el ) {
+fizz.prototype.add_element = function ( el, id ) {
     // console.log("add_element");
   if ( !el ) {
     el = this.active_el;
   } 
 
-  if ( el ) {  
-    this.active_el.setAttribute( "id", generate_unique_id( el.localName ) );
+  if ( el ) { 
+    if ( !this.active_el.id ) {
+      if (!id) {
+        id = generate_unique_id( el.localName );
+      }
+      this.active_el.setAttribute( "id", id );
+    }
+
     // insert element into canvas
     this.canvas.appendChild( this.active_el );
 
@@ -1302,6 +1342,7 @@ fizz.prototype.handle_dropdown = function (event) {
 
 fizz.prototype.handle_picker = function (event) {
   var target = event.target;
+  var value = target.textContent;
   var options = target.parentNode.querySelectorAll("[role='option']")
   for (var o = 0, oLen = options.length; oLen > o; ++o) {
     var eachOption = options[o];
@@ -1310,10 +1351,10 @@ fizz.prototype.handle_picker = function (event) {
   target.setAttribute("aria-selected", "true" );
   var prop = target.parentNode.getAttribute("data-property");
   if ( prop ) {
-    this.active_style[prop] = target.textContent;
+    this.active_style[prop] = value;
   } else {
     var datatype = target.parentNode.getAttribute("data-type");
-    this.values[datatype] = target.textContent;
+    this.values[datatype] = value;
   }
   this.deactivate_nodes();
 }
@@ -1438,7 +1479,11 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
 
           var value = document.createElement("span");
           value.setAttribute( "contenteditable",  "true" );
-          value.textContent = item.value;
+          var value_string = item.value;
+          if (0 == value_string.indexOf("data:image/")) {
+            value_string = "(dataURL)";
+          }
+          value.textContent = value_string;
           // var value = document.createTextNode( item.value );
           list_item.appendChild( value );
 

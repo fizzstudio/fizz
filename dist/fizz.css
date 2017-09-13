@@ -228,6 +228,10 @@ h1 {
   position: absolute;
 }
 
+h1:hover {
+  color: violet;
+}
+
 
 
 /* styles for controls */
@@ -362,6 +366,8 @@ svg {
   /*outline: 1px solid gray; */
   /* Note that this only works for the SVG root */
   cursor: default;
+
+  /*pointer-events: all !important;*/
 }
 
 *[role="button"] {
@@ -422,6 +428,7 @@ ul#treeview {
   padding-left: 1em;
   list-style-type: none;
   color: var(--label);
+  display: block;
 } 
 
   ul#treeview > li > details > summary {
@@ -451,7 +458,7 @@ ul[role="picker"] {
   font-family: var(--body-font);
   text-decoration: none;
   border: none;
-  background-color: gainsboro;
+  /*background-color: gainsboro;*/
   margin: 0;
   padding: 0;
 }  
@@ -465,12 +472,14 @@ ul[role="picker"] {
     font-size: 1em;
     text-align: center;
     overflow: hidden;
-    border: gainsboro 2px solid;
+    /*outline: 2px solid var(--control);*/
+    margin: 2px;
   }  
 
     ul[role="picker"] li:hover, 
     ul[role="picker"] li[aria-selected=true] {
-      border: black 2px solid;
+      /*outline: 1px solid var(--control-highlight);*/
+      box-shadow: 0 0 2px 2px var(--control-highlight);
     }  
 
     ul[role="picker"] li.none::after {
