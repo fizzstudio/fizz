@@ -1406,31 +1406,19 @@ fizz.prototype.handle_pane_switch = function (event) {
 }
 
 fizz.prototype.handle_keys = function (event) {
-  // console.info("handle_keys");
   var target = event.target;
-  if ( "Enter" === event.key ) {
+  var key = event.key;
+  console.info("handle_keys", key); 
+
+  if ( "Enter" === key ) {
     event.preventDefault();
     target.blur();
     // console.info(target, target.parentNode);
-
-    // update related element with new value
-    var tree_item = this.treeview.firstElementChild;
-    while ( false === tree_item.contains( target ) ) {
-      tree_item = tree_item.nextElementSibling;
-    }
-
-    if ( tree_item ) {
-      this.active_obj = this.elements.find( match_treeitem, tree_item );
-      // console.info(this.active_obj);
-
-      if (this.active_obj) {
-        var attr = target.parentNode.querySelector("b").textContent.split(":")[0];
-        var attr_value = target.textContent;
-        this.active_obj.element.setAttribute(attr, attr_value);
-      }
-    }
   }
 
+}
+
+fizz.prototype.handle_ = function (event) {
 }
 
 fizz.prototype.handle_inputs = function (event) {
@@ -1469,6 +1457,10 @@ fizz.prototype.get_style = function ( style_type ) {
   return style;
 }
 
+
+/*
+// Treeview
+*/
 
 fizz.prototype.add_tree_entry = function ( el ) {
     // console.log("add_tree_entry");
@@ -1518,12 +1510,16 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
           // list_item.textContent = item.name + ": " + item.value;
 
           var name_el = document.createElement("b");
+          // TODO: put attribute name in span by itself
           name_el.setAttribute( "class", "attribute" );
-          name_el.textContent = item.name + ": ";
+          // name_el.textContent = item.name + ": ";
+          name_el.textContent = item.name;
           list_item.appendChild( name_el );
 
           var value_el = document.createElement("span");
+          value_el.setAttribute( "class", "value" );
           value_el.setAttribute( "contenteditable",  "true" );
+          value_el.addEventListener("blur", bind(this, this.update_tree_entry), false );
           var value_string = item.value;
           if (0 == value_string.indexOf("data:image/")) {
             value_string = "(dataURL)";
@@ -1551,6 +1547,38 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
   }
 }
 
+
+fizz.prototype.update_tree_entry = function ( event ) {
+  // updates element when tree entry is modified
+    // console.log("update_tree_entry");
+  if ( this.treeview ) {
+    var target = event.target;
+
+    // update related element with new value
+    var tree_item = this.treeview.firstElementChild;
+    while ( false === tree_item.contains( target ) ) {
+      tree_item = tree_item.nextElementSibling;
+    }
+
+    if ( tree_item ) {
+      this.active_obj = this.elements.find( match_treeitem, tree_item );
+      // console.info(this.active_obj);
+
+      if (this.active_obj) {
+        var attr = target.parentNode.querySelector("b.attribute").textContent;
+        var attr_value = target.textContent;
+        this.active_obj.element.setAttribute(attr, attr_value);
+      }
+    }
+
+  }
+}
+
+
+
+/*
+// Reset UI
+*/
 
 fizz.prototype.reset = function () {
   // clicking on any button should start a new active element and new mode

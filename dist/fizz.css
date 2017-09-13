@@ -442,6 +442,11 @@ ul#treeview {
     font-size: smaller;
   }
 
+  ul#treeview b.attribute::after {
+   content: ": ";
+   font-weight: bold;
+  }
+
 
 .selected, .active_node {
   outline: cornflowerblue 3px dashed;
