@@ -131,7 +131,10 @@ function fizz( svgroot ) {
   this.active_scaffold = null;
   this.active_handle = null;
 
-  this.selected_el = null;
+  this.selection_marquee = null;
+  this.selected_el_list = [];
+
+  // this.selected_el = null;
   this.selected_title = null;
   this.selected_desc = null;
   this.points = null;
@@ -193,6 +196,11 @@ function fizz( svgroot ) {
     "stroke-linejoin": "round",
     "stroke-dasharray": "0.5 10",
     "marker": "url(#handle)"
+  };
+
+  this.selection_marquee_style = {
+    "fill": "cornflowerblue",
+    "fill-opacity": "0.25"
   };
 
   this.handle_style = {
@@ -713,8 +721,9 @@ fizz.prototype.draw_scaffold = function () {
 // drag-n-drop
 */
 fizz.prototype.grab = function (event) {
-  // TODO: create selective event structure for creating, updating, and ending elements, grabbing, dragging, etc.,
-  //       and use that instead of binding directly to mouse events, to help automation and UI-independence
+  // TODO: create selective event structure for creating, updating, and ending elements, grabbing, 
+  //       dragging, etc., and use that instead of binding directly to mouse events, to help 
+  //       automation and UI-independence
 
   if ( 0 == event.button && ! event.ctrlKey ) {
     // left click
@@ -732,48 +741,36 @@ fizz.prototype.grab = function (event) {
       // only grab things in drawing area 
       var target = event.target;
       if ( this.canvas.contains( target ) ) {
-        if (this.backdrop != target) {
-          this.active_el = target;
+        this.active_el = target;
+        if ( "select" == this.mode ) {
+          this.select();
+        } else if ( "copy" == this.mode ) {
+          this.copy_element( this.active_el );
+        } else {
+          this.coords = local_coords(event, this.backdrop, this.root);
+          this.originpoint = this.coords;
 
-          if ( "select" == this.mode ) {
-            this.select();
-            // if ( this.selected_el && this.selected_el != this.active_el ) {
-            //   this.selected_el.classList.remove("selected");
-
-            //   this.selected_title = this.selected_el.querySelector("title");
-            //   this.selected_desc = this.selected_el.querySelector("desc");            
-            // }
-
-            // this.selected_el = this.active_el;
-            // if ( this.selected_el ) {
-            //   this.selected_el.classList.add("selected");
-            //   this.selected_title = this.selected_el.querySelector("title");
-            //   this.selected_desc = this.selected_el.querySelector("desc");            
-            // }
-          } else if ( "copy" == this.mode ) {
-            // this.select();
-            this.copy_element( this.active_el );
-          } else {
-            this.coords = local_coords(event, this.backdrop, this.root);
-            this.originpoint = this.coords;
-
-            // adjust for existing transforms
-            var transform = this.active_el.getAttribute("transform");
-            if (transform) {
-              var translate = transform.replace("translate(", "").replace(")", "").split(",");
-              // var translate = transform.replace("translate(", "");
-              // translate = translate.replace(")", "");
-              // translate = translate.split(",");
-              this.originpoint.x -= parseFloat( translate[0] ).toFixed(2);
-              this.originpoint.y -= parseFloat( translate[1] ).toFixed(2);
-            }
-
-            if ( "drag" == this.mode ) {
-              this.active_obj = this.elements.find( match_element, this.active_el );
-              // console.log(this.active_obj)
-            } 
+          // adjust for existing transforms
+          var transform = this.active_el.getAttribute("transform");
+          if (transform) {
+            var translate = transform.replace("translate(", "").replace(")", "").split(",");
+            // var translate = transform.replace("translate(", "");
+            // translate = translate.replace(")", "");
+            // translate = translate.split(",");
+            this.originpoint.x -= parseFloat( translate[0] ).toFixed(2);
+            this.originpoint.y -= parseFloat( translate[1] ).toFixed(2);
           }
+
+          if ( "drag" == this.mode ) {
+            // TODO: refactor for multiple selections
+            this.active_obj = this.elements.find( match_element, this.active_el );
+            // console.log(this.active_obj)
+          } 
         }
+      } else if (this.backdrop === target) {
+        if ( "select" == this.mode ) {
+          this.draw_selection_marquee();
+        } 
       }
     } else if ( -1 != this.mode.indexOf("layout-") ) {
       console.log("layout: " + this.mode)
@@ -812,6 +809,7 @@ fizz.prototype.drag = function (event) {
   this.coords = local_coords(event, this.backdrop, this.root);
 
   if ( "drag" == this.mode ) {
+    // TODO: refactor for multiple selections
     var drag_x = 0;
     var drag_y = 0;
     if ( this.active_el ) {
@@ -837,6 +835,8 @@ fizz.prototype.drag = function (event) {
       }
     }
 
+  } else if ( "select" == this.mode && this.selection_marquee ) {
+    this.update_selection_marquee();
   } else if (this.active_el) {
     switch (this.mode) {
       case "draw-dot":
@@ -991,6 +991,8 @@ fizz.prototype.drop = function (event) {
     // var end_node = this.attach_node( "end" );
   }  else if ( -1 != this.mode.indexOf("draw-") ) {
     this.end_draw( event );
+  } else if ( "select" == this.mode ) {
+    this.reset();
   } else if ( "drag" == this.mode ) {
     this.active_el = null;
 
@@ -1171,53 +1173,97 @@ fizz.prototype.get_elements_by_type = function ( type ) {
 
 
 
-fizz.prototype.select = function ( targetEl ) {
+fizz.prototype.select = function ( targetEl, multiple ) {
   if ( !targetEl ) {
     targetEl = this.active_el;
   }
 
-  if ( this.selected_el && this.selected_el == targetEl ) {
+  if ( this.selected_el_list && 
+    0 != this.selected_el_list.length && 
+    targetEl.classList.contains("selected") ) {
     // deselect current selected element
-    this.selected_el.classList.remove("selected");
-    this.selected_el = null;
-    this.selected_title = null;
-    this.selected_desc = null;
+    targetEl.classList.remove("selected");
+    var index = this.selected_el_list.indexOf( targetEl );
+    if ( 0 <= index ) {
+      this.selected_el_list.splice(index, 1);
+    }
+    var target_obj = this.elements.find( match_element, targetEl );
+    target_obj.tree_item.element.classList.remove("selected");
 
-    // depopulate inputs
-    update_inputs( "title", "" );
-    update_inputs( "desc", "" );
+    for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
+      var each_el = this.selected_el_list[ s ];
+      each_el.classList.add("selected");
+    }
+
+    // this.selected_title = null;
+    // this.selected_desc = null;
+
+    // // depopulate inputs
+    // update_inputs( "title", "" );
+    // update_inputs( "desc", "" );
 
   } else {
-    if ( this.selected_el ) {
-      // deselect current selected element
-      this.selected_el.classList.remove("selected");
+    // TODO: allow multiple selected elements
+    if ( !multiple && this.selected_el_list ) {
+      // deselect current selected elements
+      while ( 0 != this.selected_el_list.length ) {
+        var each_el = this.selected_el_list.pop();
+        each_el.classList.remove("selected");       
+        var each_obj = this.elements.find( match_element, each_el );
+        each_obj.tree_item.element.classList.remove("selected");
+      }
     }
 
     // select current active element
-    this.selected_el = targetEl;
-    this.selected_el.classList.add("selected");
+    this.selected_el_list.push( targetEl );
+    targetEl.classList.add("selected");
+    var target_obj = this.elements.find( match_element, targetEl );
+    target_obj.tree_item.element.classList.add("selected");
 
-    // TODO: allow multiple selected elements
+    // if ( !multiple && this.selected_el ) {
+    //   // deselect current selected element
+    //   this.selected_el.classList.remove("selected");
+    // }
+
+    // // select current active element
+    // this.selected_el = targetEl;
+    // this.selected_el.classList.add("selected");
 
 
+    ////////////////////
+    // if ( this.selected_el && this.selected_el != this.active_el ) {
+    //   this.selected_el.classList.remove("selected");
+    // 
+    //   this.selected_title = this.selected_el.querySelector("title");
+    //   this.selected_desc = this.selected_el.querySelector("desc");            
+    // }
+    // 
+    // this.selected_el = this.active_el;
+    // if ( this.selected_el ) {
+    //   this.selected_el.classList.add("selected");
+    //   this.selected_title = this.selected_el.querySelector("title");
+    //   this.selected_desc = this.selected_el.querySelector("desc");            
+    // }
+    //////////////////
+
+    /*
     // // from EyeScribe
     // this.selected_title = this.selected_el.querySelector("title");
     // this.selected_desc = this.selected_el.querySelector("desc");  
-
+    // 
     // // populate UI title and desc inputs
     // var title_text = "";
     // if ( this.selected_title ) {
     //   title_text = this.selected_title.textContent;
     // }
     // update_inputs( "title", title_text );
-
+    // 
     // var desc_text = "";
     // if ( this.selected_desc ) {
     //   desc_text = this.selected_desc.textContent;
     // }
     // update_inputs( "desc", desc_text );
-
-
+    // 
     // // populate UI link settings
     // var parent_el = this.selected_el.parentNode;
     // var url_value = "";
@@ -1227,65 +1273,154 @@ fizz.prototype.select = function ( targetEl ) {
     //   link_target_value = parent_el.getAttribute( "target" );
     // }        
     // update_link_settings( url_value, link_target_value );
-
+    // 
     // // convert all to hilites
-    // initEyescribe();      
+    // initEyescribe(); 
+    */    
   } 
 }
 
-fizz.prototype.update_title = function ( title_text ) {
-  if ( this.selected_el ) {
-    if ( !this.selected_title ) {
-      this.selected_title = this.selected_el.querySelector("title");
+fizz.prototype.draw_selection_marquee = function ( box ) {
+  this.selection_marquee = document.createElementNS(this.svgns, "rect");
+  this.selection_marquee.setAttribute("style", this.get_style(this.selection_marquee_style) );
+  this.scaffolds.appendChild( this.selection_marquee );
 
-      if ( !this.selected_title ) {
-        this.selected_title = document.createElementNS(this.svgns, "title");
-        this.selected_el.appendChild( this.selected_title ); 
-
-        if (!title_text) {
-          title_text = "add meaningful title";
-        }           
-      }
-    }
-
-    console.log("textContent 1");
-    this.selected_title.textContent = title_text;
+  if (!this.points) {
+    this.points = [];
   }
+
+  // we're using the points array, but in a different way for rect than for polys  
+  this.points.push( this.coords.x );
+  this.points.push( this.coords.y );
+
+  this.selection_marquee.setAttribute("x", this.points[0] );
+  this.selection_marquee.setAttribute("y", this.points[1] );
+  this.selection_marquee.setAttribute("width", 0 );
+  this.selection_marquee.setAttribute("height", 0 );
+}
+
+fizz.prototype.update_selection_marquee = function () {
+  // we're using the points array, but in a different way for rect than for polys  
+  this.points[2] = this.coords.x;
+  this.points[3] = this.coords.y;
+
+  var x = this.points[0];
+  var width = this.points[2] - this.points[0];
+  if ( 0 > width ) {
+    //if the current cursor x is to the left of the origin, we have to reposition the x attribute
+    x = this.points[2];
+    width = this.points[0] - this.points[2];
+  }
+
+  var y = this.points[1];
+  var height = this.points[3] - this.points[1];
+  if ( 0 > height ) {
+    //if the current cursor y is to the top of the origin, we have to reposition the y attribute
+    y = this.points[3];
+    height = this.points[1] - this.points[3];
+  }
+
+  this.selection_marquee.setAttribute("x", x );
+  this.selection_marquee.setAttribute("y", y );
+  this.selection_marquee.setAttribute("width", width );
+  this.selection_marquee.setAttribute("height", height );
+
+  this.selected_el_list = this.get_enclosed_elements( { x: x,  y: y,  width: width,  height: height }, true );
+  // console.info(this.selected_el_list)
+  for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
+    // TODO: factor out selection/deselection code into select / deselect functions
+    var each_el = this.selected_el_list[ s ];
+    each_el.classList.add("selected");
+    var each_obj = this.elements.find( match_element, each_el );
+    each_obj.tree_item.element.classList.add("selected");
+  }
+}
+
+
+fizz.prototype.get_enclosed_elements = function ( box, deselect ) {
+  var enclosed_els = [];
+  var all_els = this.canvas.querySelectorAll("*");
+  for (var a = 0, a_len = all_els.length; a_len > a; ++a) {
+    var each_el = all_els[ a ]; 
+
+    if ( each_el.getBBox ) {
+      var each_bbox = each_el.getBBox();
+
+      if ( box.x <= each_bbox.x &&
+           box.y <= each_bbox.y &&
+           (box.x + box.width) >= (each_bbox.x + each_bbox.width) &&
+           (box.y + box.height) >= (each_bbox.y + each_bbox.height) ) {
+        enclosed_els.push(each_el);
+      } else if ( deselect ) {
+        each_el.classList.remove("selected");
+        var each_obj = this.elements.find( match_element, each_el );
+        each_obj.tree_item.element.classList.remove("selected");
+      }         
+    }
+  }
+
+  return enclosed_els;
+}
+
+fizz.prototype.update_title = function ( title_text ) {
+  // TODO: refactor for multiple selections
+
+  // if ( this.selected_el ) {
+  //   if ( !this.selected_title ) {
+  //     this.selected_title = this.selected_el.querySelector("title");
+
+  //     if ( !this.selected_title ) {
+  //       this.selected_title = document.createElementNS(this.svgns, "title");
+  //       this.selected_el.appendChild( this.selected_title ); 
+
+  //       if (!title_text) {
+  //         title_text = "add meaningful title";
+  //       }           
+  //     }
+  //   }
+
+  //   console.log("textContent 1");
+  //   this.selected_title.textContent = title_text;
+  // }
 }
 
 fizz.prototype.update_desc = function ( desc_text ) {
-  if ( this.selected_el ) {
-    if ( !this.selected_desc ) {
-      this.selected_desc = this.selected_el.querySelector("desc");
+  // TODO: refactor for multiple selections
 
-      if ( !this.selected_desc ) {
-        this.selected_desc = document.createElementNS(this.svgns, "desc");
-        this.selected_el.appendChild( this.selected_desc ); 
+  // if ( this.selected_el ) {
+  //   if ( !this.selected_desc ) {
+  //     this.selected_desc = this.selected_el.querySelector("desc");
 
-        if (!desc_text) {
-          desc_text = "add meaningful description";
-        }           
-      }
-    }
+  //     if ( !this.selected_desc ) {
+  //       this.selected_desc = document.createElementNS(this.svgns, "desc");
+  //       this.selected_el.appendChild( this.selected_desc ); 
 
-    console.log("textContent 2");
-    this.selected_desc.textContent = desc_text;
-  }
+  //       if (!desc_text) {
+  //         desc_text = "add meaningful description";
+  //       }           
+  //     }
+  //   }
+
+  //   console.log("textContent 2");
+  //   this.selected_desc.textContent = desc_text;
+  // }
 }
 
 fizz.prototype.add_link = function ( url, target ) {
-  var parent_el = this.selected_el.parentNode;
-  if ( "a" == parent_el.localName ) {
-    parent_el.setAttributeNS("http:x//www.w3.org/1999/xlink", "href", url );
-    parent_el.setAttribute( "target", target );
-  } else {
-    var link_el = document.createElementNS(this.svgns, "a");
-    link_el.setAttributeNS("http://www.w3.org/1999/xlink", "href", url );
-    link_el.setAttribute( "target", target );
+  // TODO: refactor for multiple selections
 
-    parent_el.insertBefore( link_el, this.selected_el );
-    link_el.appendChild( this.selected_el );
-  }
+  // var parent_el = this.selected_el.parentNode;
+  // if ( "a" == parent_el.localName ) {
+  //   parent_el.setAttributeNS("http:x//www.w3.org/1999/xlink", "href", url );
+  //   parent_el.setAttribute( "target", target );
+  // } else {
+  //   var link_el = document.createElementNS(this.svgns, "a");
+  //   link_el.setAttributeNS("http://www.w3.org/1999/xlink", "href", url );
+  //   link_el.setAttribute( "target", target );
+
+  //   parent_el.insertBefore( link_el, this.selected_el );
+  //   link_el.appendChild( this.selected_el );
+  // }
 }
 
 
@@ -1361,8 +1496,11 @@ fizz.prototype.handle_picker = function (event) {
   if ( prop ) {
     this.active_style[prop] = value;
 
-    if ( this.selected_el ) {
-      this.selected_el.setAttribute("style", this.get_style(this.active_style) );
+    if ( this.selected_el_list ){
+      for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
+        var each_el = this.selected_el_list[ s ];
+        each_el.setAttribute("style", this.get_style(this.active_style) );
+      }      
     }
   } else {
     var datatype = target.parentNode.getAttribute("data-type");
@@ -1435,8 +1573,11 @@ fizz.prototype.handle_inputs = function (event) {
   if ( !scope || "shape" == scope ) {
     this.active_style[prop] = val;
 
-    if ( this.selected_el ) {
-      this.selected_el.setAttribute("style", this.get_style(this.active_style) );
+    if ( this.selected_el_list ){
+      for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
+        var each_el = this.selected_el_list[ s ];
+        each_el.setAttribute("style", this.get_style(this.active_style) );
+      }
     }
   } else if ( "text" == scope ) {
     this.active_text_style[prop] = val;
@@ -1568,6 +1709,7 @@ fizz.prototype.update_tree_entry = function ( event ) {
         var attr = target.parentNode.querySelector("b.attribute").textContent;
         var attr_value = target.textContent;
         this.active_obj.element.setAttribute(attr, attr_value);
+        // TODO: add animated transition flash around changing element
       }
     }
 
@@ -1589,6 +1731,8 @@ fizz.prototype.reset = function () {
 
   this.active_scaffold = null;
   this.active_handle = null;
+  this.selection_marquee = null;
+  // this.selected_el_list = null;
 
   // NOTE: remove all old scaffolds
   while (this.scaffolds.firstChild) {
@@ -2015,7 +2159,10 @@ connector.prototype.find_port = function( sourceports, sourcex, sourcey, targetp
     var sourcePort = sourceports[ p ];
     for ( var t = 0, tLen = targetports.length; tLen > t; t++ ) {
       var targetPort = targetports[ t ];
-      d = get_distance( (sourcePort.x + sourcex), (sourcePort.y + sourcey), (targetPort.x + targetx), (targetPort.y + targety) );
+      d = get_distance( (sourcePort.x + sourcex), 
+                        (sourcePort.y + sourcey), 
+                        (targetPort.x + targetx), 
+                        (targetPort.y + targety) );
       if ( null == distance || d <= distance ) {
         // alert( this.id + "\n" + distance + "\n" + d + "\n" + sourcePort.id + " " + targetPort.id )
         distance = d;

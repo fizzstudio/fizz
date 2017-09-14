@@ -390,7 +390,7 @@ svg {
   }
 
 svg#canvas {
-  /* pointer-events: all; */
+   pointer-events: all; 
 }
 
 rect#backdrop {
@@ -431,6 +431,12 @@ ul#treeview {
   display: block;
 } 
 
+  ul#treeview > li {
+    padding: 0.1em 0.5em 0.1em 0.1em;
+/*    margin-left: -0.25em;
+    width: 100%;*/
+  }
+
   ul#treeview > li > details > summary {
     margin-left: -1em;
     font-weight: bold;
@@ -442,6 +448,11 @@ ul#treeview {
     font-size: smaller;
   }
 
+  ul#treeview > li.selected {
+    outline: none;
+    background-color: var(--control);
+  }
+
   ul#treeview b.attribute::after {
    content: ": ";
    font-weight: bold;
@@ -449,7 +460,8 @@ ul#treeview {
 
 
 .selected, .active_node {
-  outline: cornflowerblue 3px dashed;
+  outline: hsla(219, 79%, 66%, 0.8) 3px dashed;
+  /*hsl(219, 79, 66)*/
 }
 
 
