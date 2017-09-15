@@ -558,10 +558,6 @@ input {
 
 
 /* styles for element treeview */
-section#treeview_pane {
-  display: block;  
-}
-
 ul#treeview {
   padding-left: 0.1em;
   margin-left: -0.2em;

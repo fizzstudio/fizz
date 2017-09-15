@@ -429,20 +429,28 @@ fizz.prototype.draw = function (event) {
           this.draw_dot();
           break;
 
+        case "draw-circle":
+          this.draw_circle();
+          break;
+
+        case "draw-ellipse":
+          this.draw_ellipse();
+          break;
+
+        case "draw-line":
+          this.draw_line();
+          break;
+
         case "draw-polyline":
-          this.draw_poly("polyline" );
+          this.draw_poly( "polyline" );
           break;
 
         case "draw-polygon":
-          this.draw_poly("polygon");
+          this.draw_poly( "polygon");
           break;
 
         case "draw-rect":
           this.draw_rect();
-          break;
-
-        case "draw-circle":
-          this.draw_circle();
           break;
 
         case "draw-path":
@@ -497,6 +505,53 @@ fizz.prototype.draw_circle = function () {
     this.active_el.setAttribute("cx", this.points[0] );
     this.active_el.setAttribute("cy", this.points[1] );
     this.active_el.setAttribute("r", 0 );
+
+    this.update_element( this.active_el );
+  }      
+}
+
+fizz.prototype.draw_ellipse = function () {
+  if (!this.active_el ) {
+    this.active_el = document.createElementNS(this.svgns, "ellipse");
+    this.add_element( this.active_el );
+    this.active_el.setAttribute("style", this.get_style());
+
+    if (!this.points) {
+      this.points = [];
+    }
+
+    // we're using the points array, but in a different way for rect than for polys  
+    this.points.push( this.coords.x );
+    this.points.push( this.coords.y );
+
+    this.active_el.setAttribute("cx", this.points[0] );
+    this.active_el.setAttribute("cy", this.points[1] );
+    this.active_el.setAttribute("rx", 0 );
+    this.active_el.setAttribute("ry", 0 );
+
+    this.update_element( this.active_el );
+  }      
+}
+
+fizz.prototype.draw_line = function () {
+  // console.log("draw_line")
+  if (!this.active_el ) {
+    this.active_el = document.createElementNS(this.svgns, "line");
+    this.add_element( this.active_el );
+    this.active_el.setAttribute("style", this.get_style());
+
+    if (!this.points) {
+      this.points = [];
+    }
+
+    // we're using the points array, but in a different way for rect than for polys  
+    this.points.push( this.coords.x );
+    this.points.push( this.coords.y );
+
+    this.active_el.setAttribute("x1", this.points[0] );
+    this.active_el.setAttribute("y1", this.points[1] );
+    this.active_el.setAttribute("x2", this.points[0] );
+    this.active_el.setAttribute("y2", this.points[1] );
 
     this.update_element( this.active_el );
   }      
@@ -838,13 +893,14 @@ fizz.prototype.grab = function (event) {
           this.draw_selection_marquee();
         } else if ( "add-group" == this.mode ) {
           // clear current selection list
-          this.reset();
+          this.reset( true );
+
           // allow grouping by selection marquee when in "add-group" mode
           this.draw_selection_marquee();
 
-          // TODO: "add-group" mode: clicking on element adds it to current group? or creates new group?
           // TODO: apply transform to whole group when dragging? opt-out key to just move single member?
 
+          // TODO: "add-group" mode: clicking on element adds it to current group? or creates new group?
           // TODO: add option buttons to treeview items to hide/show, and to set 
           //       active group (target for where new items will be created)
         } 
@@ -921,12 +977,20 @@ fizz.prototype.drag = function (event) {
       case "draw-dot":
         break;
 
-      case "draw-rect":
-        this.update_rect();
-        break;
-
       case "draw-circle":
         this.update_circle();
+        break;
+
+      case "draw-ellipse":
+        this.update_ellipse();
+        break;
+
+      case "draw-line":
+        this.update_line();
+        break;
+
+      case "draw-rect":
+        this.update_rect();
         break;
 
       case "draw-polyline":
@@ -958,6 +1022,71 @@ fizz.prototype.drag = function (event) {
 /*
 // Update shapes
 */
+
+fizz.prototype.update_circle = function () {
+  this.points[2] = this.coords.x;
+  this.points[3] = this.coords.y;
+
+  // geometry magic!
+  var radius = Math.sqrt(Math.pow(Math.abs(this.points[2] - this.points[0]), 2) 
+             + Math.pow(Math.abs(this.points[3] - this.points[1]), 2));
+  this.active_el.setAttribute("r", +radius.toFixed(2) );
+}
+
+fizz.prototype.update_ellipse = function () {
+  this.points[2] = this.coords.x;
+  this.points[3] = this.coords.y;
+
+
+  var rx = Math.abs((this.points[2] - this.points[0]));
+  var ry = Math.abs((this.points[3] - this.points[1]));
+
+  this.active_el.setAttribute("rx", +rx.toFixed(2) );
+  this.active_el.setAttribute("ry", +ry.toFixed(2) );
+
+  if ( rx == ry ) {
+    // perfect circle, consider styling scaffold different color
+  } else {
+    // ellipse, return default scaffold styling
+  }
+}
+
+fizz.prototype.update_line = function () {
+  // we're using the points array, but in a different way for rect than for polys  
+  this.points[2] = this.coords.x;
+  this.points[3] = this.coords.y;
+
+  this.active_el.setAttribute("x2", this.coords.x );
+  this.active_el.setAttribute("y2", this.coords.y );
+}
+
+fizz.prototype.update_rect = function () {
+  // we're using the points array, but in a different way for rect than for polys  
+  this.points[2] = this.coords.x;
+  this.points[3] = this.coords.y;
+
+  var x = this.points[0];
+  var width = this.points[2] - this.points[0];
+  if ( 0 > width ) {
+    //if the current cursor x is to the left of the origin, we have to reposition the x attribute
+    x = this.points[2];
+    width = this.points[0] - this.points[2];
+  }
+
+  var y = this.points[1];
+  var height = this.points[3] - this.points[1];
+  if ( 0 > height ) {
+    //if the current cursor y is to the top of the origin, we have to reposition the y attribute
+    y = this.points[3];
+    height = this.points[1] - this.points[3];
+  }
+
+  this.active_el.setAttribute("x", x );
+  this.active_el.setAttribute("y", y );
+  this.active_el.setAttribute("width", width );
+  this.active_el.setAttribute("height", height );
+}
+
 fizz.prototype.update_poly = function () {
   // console.log("update_poly")
   var points = this.points.join(" ");
@@ -997,43 +1126,6 @@ fizz.prototype.update_freehand = function () {
   }
   d += this.coords.x + "," + this.coords.y + " ";
   this.active_el.setAttribute("d", d);
-}
-
-fizz.prototype.update_rect = function () {
-  // we're using the points array, but in a different way for rect than for polys  
-  this.points[2] = this.coords.x;
-  this.points[3] = this.coords.y;
-
-  var x = this.points[0];
-  var width = this.points[2] - this.points[0];
-  if ( 0 > width ) {
-    //if the current cursor x is to the left of the origin, we have to reposition the x attribute
-    x = this.points[2];
-    width = this.points[0] - this.points[2];
-  }
-
-  var y = this.points[1];
-  var height = this.points[3] - this.points[1];
-  if ( 0 > height ) {
-    //if the current cursor y is to the top of the origin, we have to reposition the y attribute
-    y = this.points[3];
-    height = this.points[1] - this.points[3];
-  }
-
-  this.active_el.setAttribute("x", x );
-  this.active_el.setAttribute("y", y );
-  this.active_el.setAttribute("width", width );
-  this.active_el.setAttribute("height", height );
-}
-
-fizz.prototype.update_circle = function () {
-  this.points[2] = this.coords.x;
-  this.points[3] = this.coords.y;
-
-  // geometry magic!
-  var radius = Math.sqrt(Math.pow(Math.abs(this.points[2] - this.points[0]), 2) 
-             + Math.pow(Math.abs(this.points[3] - this.points[1]), 2));
-  this.active_el.setAttribute("r", +radius.toFixed(2) );
 }
 
 fizz.prototype.update_use = function () {
@@ -1849,7 +1941,7 @@ fizz.prototype.update_tree_entry = function ( event ) {
 // Reset UI
 */
 
-fizz.prototype.reset = function () {
+fizz.prototype.reset = function ( clear_selected ) {
   // clicking on any button should start a new active element and new mode
   this.active_el = null;
   this.points = null;
@@ -1860,7 +1952,10 @@ fizz.prototype.reset = function () {
   this.active_handle = null;
   this.active_container = null;
   this.selection_marquee = null;
-  this.selected_el_list = [];
+
+  if ( clear_selected ) {
+    this.selected_el_list = [];
+  }
 
   // NOTE: remove all old scaffolds
   while (this.scaffolds.firstChild) {
