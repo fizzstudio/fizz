@@ -126,6 +126,8 @@ function fizz( svgroot ) {
   this.active_el = null;
   this.active_obj = null;
   this.active_tree_entry = null;
+  this.active_container = null; // containers are group, defs, svg, symbol, etc.
+
   this.active_connector = null;
 
   this.active_scaffold = null;
@@ -237,6 +239,14 @@ function fizz( svgroot ) {
   // constants
   this.svgns = "http://www.w3.org/2000/svg";
   this.xlinkns = "http://www.w3.org/1999/xlink";
+
+  this.container_types = [
+    "svg",
+    "g",
+    "defs",
+    "symbol",
+    "metadata"
+  ]; // consider including paint servers, like <linearGradient>
 }
 
 fizz.prototype.init = function () {
@@ -695,6 +705,57 @@ fizz.prototype.draw_text = function () {
   this.update_element( this.active_el );
 }
 
+fizz.prototype.create_group = function () {
+  this.active_container = document.createElementNS(this.svgns, "g");
+  this.add_element( this.active_container );
+}
+
+fizz.prototype.add_to_container = function ( el_list ) {
+  if ( el_list && this.active_container ){
+    // find all container elements in the list
+    // TDODO: NOT OPTIMIZED
+    var container_els = [];
+    for (var s = 0, s_len = el_list.length; s_len > s; ++s) {
+      var each_el = el_list[ s ];
+      container_els.push(each_el);
+    } 
+
+    // remove all children of a selected container element from the list, 
+    //   otherwise they'll be removed from the selected container and put into the new container
+    for (var c = 0, c_len = container_els.length; c_len > c; ++c) {
+      var each_container = container_els[c];
+      for(var child = each_container.firstElementChild; null !== child; child = child.nextElementSibling) {
+        var target_index = el_list.indexOf( child );
+        if ( -1 < target_index ) {
+          el_list.splice( target_index, 1 );
+        }  
+      }
+    }
+
+    var container_obj = this.elements.find( match_element, this.active_container );
+    if (container_obj) {
+      var container_tree = container_obj.tree_item.element.querySelector("ul.child-elements");
+    }      
+
+    for (var s = 0, s_len = el_list.length; s_len > s; ++s) {
+      var each_el = el_list[ s ];
+
+      // if we're allowing <g> to be in selected_el_list, test for inception
+      if ( this.active_container != each_el 
+        && !each_el.contains(this.active_container) ) {
+        this.active_container.appendChild( each_el );
+
+        // redraw treeview     
+        var each_obj = this.elements.find( match_element, each_el );
+        each_obj.parent = each_el.parentNode;
+        container_tree.appendChild( each_obj.tree_item.element );
+      }
+    }      
+  }
+}
+
+
+
 /* 
 // Scaffold
 */
@@ -733,6 +794,7 @@ fizz.prototype.grab = function (event) {
       || "copy" == this.mode 
       || "delete" == this.mode 
       || "select" == this.mode 
+      || "add-group" == this.mode 
       || "animate" == this.mode ) {
       // stop native drag-n-drop
       event.preventDefault();
@@ -743,7 +805,11 @@ fizz.prototype.grab = function (event) {
       if ( this.canvas.contains( target ) ) {
         this.active_el = target;
         if ( "select" == this.mode ) {
-          this.select();
+          var multiple = false;
+          if ( event.shiftKey ) {
+            multiple = true;
+          }
+          this.select( target, multiple );
         } else if ( "copy" == this.mode ) {
           this.copy_element( this.active_el );
         } else {
@@ -770,6 +836,17 @@ fizz.prototype.grab = function (event) {
       } else if (this.backdrop === target) {
         if ( "select" == this.mode ) {
           this.draw_selection_marquee();
+        } else if ( "add-group" == this.mode ) {
+          // clear current selection list
+          this.reset();
+          // allow grouping by selection marquee when in "add-group" mode
+          this.draw_selection_marquee();
+
+          // TODO: "add-group" mode: clicking on element adds it to current group? or creates new group?
+          // TODO: apply transform to whole group when dragging? opt-out key to just move single member?
+
+          // TODO: add option buttons to treeview items to hide/show, and to set 
+          //       active group (target for where new items will be created)
         } 
       }
     } else if ( -1 != this.mode.indexOf("layout-") ) {
@@ -836,6 +913,8 @@ fizz.prototype.drag = function (event) {
     }
 
   } else if ( "select" == this.mode && this.selection_marquee ) {
+    this.update_selection_marquee();
+  }  else if ( "add-group" == this.mode && this.selection_marquee ) {
     this.update_selection_marquee();
   } else if (this.active_el) {
     switch (this.mode) {
@@ -1002,6 +1081,23 @@ fizz.prototype.drop = function (event) {
     if ( this.active_el ) {
       this.delete_element( this.active_el );
     }
+  } else if ( "add-group" == this.mode ) {
+    // detect if this was a click on an element, which should be added to a group
+    if ( this.active_el ) {
+      this.select( this.active_el, true );
+      // console.info("active_el", )
+    }
+
+    if ( this.selected_el_list.length ) {
+      if (!this.active_container) {
+        this.create_group();
+      }
+
+      this.add_to_container( this.selected_el_list );
+    }
+
+
+    this.reset();
   } else if ( "animate" == this.mode ) {
     this.animate();
   }
@@ -1095,15 +1191,15 @@ fizz.prototype.add_element = function ( el, id ) {
   } 
 
   if ( el ) { 
-    if ( !this.active_el.id ) {
+    if ( !el.id ) {
       if (!id) {
         id = generate_unique_id( el.localName );
       }
-      this.active_el.setAttribute( "id", id );
+      el.setAttribute( "id", id );
     }
 
     // insert element into canvas
-    this.canvas.appendChild( this.active_el );
+    this.canvas.appendChild( el );
 
     this.add_tree_entry( el );
 
@@ -1173,21 +1269,20 @@ fizz.prototype.get_elements_by_type = function ( type ) {
 
 
 
-fizz.prototype.select = function ( targetEl, multiple ) {
-  if ( !targetEl ) {
-    targetEl = this.active_el;
+fizz.prototype.select = function ( target_el, multiple ) {
+  if ( !target_el ) {
+    target_el = this.active_el;
   }
 
-  if ( this.selected_el_list && 
-    0 != this.selected_el_list.length && 
-    targetEl.classList.contains("selected") ) {
+  if ( this.selected_el_list.length 
+    && target_el.classList.contains("selected") ) {
     // deselect current selected element
-    targetEl.classList.remove("selected");
-    var index = this.selected_el_list.indexOf( targetEl );
+    target_el.classList.remove("selected");
+    var index = this.selected_el_list.indexOf( target_el );
     if ( 0 <= index ) {
       this.selected_el_list.splice(index, 1);
     }
-    var target_obj = this.elements.find( match_element, targetEl );
+    var target_obj = this.elements.find( match_element, target_el );
     target_obj.tree_item.element.classList.remove("selected");
 
     for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
@@ -1215,9 +1310,9 @@ fizz.prototype.select = function ( targetEl, multiple ) {
     }
 
     // select current active element
-    this.selected_el_list.push( targetEl );
-    targetEl.classList.add("selected");
-    var target_obj = this.elements.find( match_element, targetEl );
+    this.selected_el_list.push( target_el );
+    target_el.classList.add("selected");
+    var target_obj = this.elements.find( match_element, target_el );
     target_obj.tree_item.element.classList.add("selected");
 
     // if ( !multiple && this.selected_el ) {
@@ -1226,7 +1321,7 @@ fizz.prototype.select = function ( targetEl, multiple ) {
     // }
 
     // // select current active element
-    // this.selected_el = targetEl;
+    // this.selected_el = target_el;
     // this.selected_el.classList.add("selected");
 
 
@@ -1280,7 +1375,7 @@ fizz.prototype.select = function ( targetEl, multiple ) {
   } 
 }
 
-fizz.prototype.draw_selection_marquee = function ( box ) {
+fizz.prototype.draw_selection_marquee = function () {
   this.selection_marquee = document.createElementNS(this.svgns, "rect");
   this.selection_marquee.setAttribute("style", this.get_style(this.selection_marquee_style) );
   this.scaffolds.appendChild( this.selection_marquee );
@@ -1344,6 +1439,7 @@ fizz.prototype.get_enclosed_elements = function ( box, deselect ) {
     var each_el = all_els[ a ]; 
 
     if ( each_el.getBBox ) {
+      // TODO: currently, this also selects groups; decide if that's desired
       var each_bbox = each_el.getBBox();
 
       if ( box.x <= each_bbox.x &&
@@ -1463,6 +1559,17 @@ fizz.prototype.handle_buttons = function (event) {
   // console.log("mode: " + this.mode);
 
   this.deactivate_nodes();
+
+  // trigger modes that activate immediately without interacting with the canvas
+  switch (this.mode) {
+    case "add-group":
+      if ( this.selected_el_list.length ){
+        // activate group button when pressed, without need to click canvas, group selected elements
+        this.create_group();
+        this.add_to_container( this.selected_el_list );
+     }
+      break;
+  }
 }
 
 fizz.prototype.handle_dropdown = function (event) {
@@ -1603,9 +1710,12 @@ fizz.prototype.get_style = function ( style_type ) {
 // Treeview
 */
 
-fizz.prototype.add_tree_entry = function ( el ) {
+fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     // console.log("add_tree_entry");
   if ( this.treeview ) {
+    if ( !tree_container ) {
+      tree_container = this.treeview;
+    } 
 
     // var attrs = document.getElementById("myId").attributes;
     // Array.prototype.slice.call(document.getElementById("myId").attributes).forEach(function(item) {
@@ -1615,20 +1725,36 @@ fizz.prototype.add_tree_entry = function ( el ) {
     // var tree_entry = null;
 
     // console.log();
+    var el_type = el.localName;
+
     this.active_tree_entry = document.createElement("li");
     var details = document.createElement("details");
     details.setAttribute( "open",  "true" );
     this.active_tree_entry.appendChild( details );
     var summary = document.createElement("summary");
-    summary.textContent = el.localName;
+    summary.textContent = el_type;
     details.appendChild( summary );
+
+    /*
+    // uncomment when we add toggle buttons to treeview items
+    var toggle_button = document.createElement("button");
+    toggle_button.textContent = "●";
+    summary.appendChild( toggle_button );
+    // TODO: add event listener to toggle states
+    */
 
     this.add_tree_attributes( el, details );
 
     // var subtree = this.add_tree_attributes( el );
     // details.appendChild( subtree );
+
+    if ( this.container_types.includes( el_type ) ) {
+      var sub_list = document.createElement("ul");
+      sub_list.classList.add("child-elements");
+      details.appendChild( sub_list );
+    }
     
-    this.treeview.appendChild( this.active_tree_entry );
+    tree_container.appendChild( this.active_tree_entry );
     // this.active_tree_entry.scrollIntoView(true);
     this.active_tree_entry.scrollIntoView( {block: "end", behavior: "smooth"} );
   }
@@ -1638,6 +1764,7 @@ fizz.prototype.add_tree_entry = function ( el ) {
 fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
   if ( this.treeview && el && parent_node ) {
     var list = document.createElement("ul");
+    list.classList.add("attributes");
 
     var attributes_array = Array.prototype.slice.call(el.attributes);
     // attrs.forEach( function( item ) {
@@ -1731,8 +1858,9 @@ fizz.prototype.reset = function () {
 
   this.active_scaffold = null;
   this.active_handle = null;
+  this.active_container = null;
   this.selection_marquee = null;
-  // this.selected_el_list = null;
+  this.selected_el_list = [];
 
   // NOTE: remove all old scaffolds
   while (this.scaffolds.firstChild) {

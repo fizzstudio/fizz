@@ -422,43 +422,6 @@ nav::-webkit-scrollbar-thumb, aside::-webkit-scrollbar-thumb {
 }
 
 
-/* styles for element treeview */
-
-ul#treeview {
-  padding-left: 1em;
-  list-style-type: none;
-  color: var(--label);
-  display: block;
-} 
-
-  ul#treeview > li {
-    padding: 0.1em 0.5em 0.1em 0.1em;
-/*    margin-left: -0.25em;
-    width: 100%;*/
-  }
-
-  ul#treeview > li > details > summary {
-    margin-left: -1em;
-    font-weight: bold;
-  }
-
-  ul#treeview > li > details > ul {
-    margin-left: -2.5em;
-    list-style-type: none;
-    font-size: smaller;
-  }
-
-  ul#treeview > li.selected {
-    outline: none;
-    background-color: var(--control);
-  }
-
-  ul#treeview b.attribute::after {
-   content: ": ";
-   font-weight: bold;
-  }
-
-
 .selected, .active_node {
   outline: hsla(219, 79%, 66%, 0.8) 3px dashed;
   /*hsl(219, 79, 66)*/
@@ -593,6 +556,68 @@ input {
 }  
 
 
+
+/* styles for element treeview */
+section#treeview_pane {
+  display: block;  
+}
+
+ul#treeview {
+  padding-left: 0.1em;
+  margin-left: -0.2em;
+  margin-top: -0.15em;
+  color: var(--label);
+} 
+
+  ul#treeview,
+  ul#treeview ul.attributes, 
+  ul#treeview ul.child-elements {
+    list-style-type: none;
+    display: block;  
+  } 
+
+  ul#treeview li > details {
+    margin-bottom: 0.1em;
+  }
+
+  ul#treeview li > details > summary {
+    font-weight: bold;
+  }
+
+  ul#treeview ul.attributes {
+    font-size: smaller;
+  }
+
+    ul#treeview b.attribute::after {
+     content: ": ";
+     font-weight: bold;
+    }
+
+  ul#treeview ul.attributes, 
+  ul#treeview ul.child-elements {
+    margin-left: -1.5em;
+  } 
+
+    ul#treeview li.selected {
+      outline: none;
+      background-color: var(--control);
+    }
+
+/*
+uncomment when we add toggle buttons to treeview items
+      ul#treeview > li > details > summary > button {
+        display: inline-block;
+        padding: 0;
+        padding-bottom: 0.5em;
+        border: none;
+        outline: none;
+        background-color: none;
+        margin-left: 1em;
+        max-width: 1em;
+        max-height: 1em;
+      }
+
+*/ 
 
 
 /* styles for viewer controls */
