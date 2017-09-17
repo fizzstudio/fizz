@@ -132,11 +132,8 @@
 
           <rect id="backdrop" x="0" y="0" width="1500" height="1500"/>
 
-          <svg id="canvas" x="0" y="0" width="100%" height="100%"> </svg>
+          <svg id="canvas" x="0" y="0" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> </svg>
 
-<!--           <svg id="canvas" x="0" y="0" width="100%" height="100%" 
-            xmlns="http://www.w3.org/2000/svg" 
-            xmlns:xlink="http://www.w3.org/1999/xlink"> </svg> -->
           <g id="scaffolds"> </g>
 
         </svg>
@@ -156,7 +153,8 @@
         <input name="nav_tabs" type="radio" id="tab-import" class="tab"/>
         <label for="tab-import" class="tab_label import">I/O</label>
         <section class="panel" id="import_pane">
-          <input type="file" id="file_input" accept="image/*">
+          <input id="file_input_button" type="file"
+                 accept="image/*, .svg,.png,.jpg,.jpeg,.gif, text/x-graphviz, .gv,.dot">
 
           <section id="info">
             <output id="file-name"> </output>

@@ -157,7 +157,7 @@ function fizz( svgroot ) {
   this.file = null;
   this.file_type = null;
   this.file_reader = null;  
-  this.file_input_button = document.getElementById( "file_input" );
+  this.file_input_button = document.getElementById( "file_input_button" );
   this.file_save_button = document.getElementById( "file_save_button" );
 
   // coordinate variables
@@ -308,17 +308,24 @@ fizz.prototype.init = function () {
 */
 fizz.prototype.upload_file = function (event) {
   this.file = event.target.files[0]; // FileList object
+  console.info("file", this.file)
 
-  this.file_reader = new FileReader();
 
   if (this.file) {
-    console.info(this.file)
+    this.file_reader = new FileReader();
+
+    // console.info(this.file)
     if ("image/svg+xml" == this.file.type) {
       this.file_reader.readAsText(this.file);
       this.file_reader.addEventListener("load", bind(this, this.insert_svg), false);
-    } else {
+    } else if ( 0 === this.file.type.indexOf("image/") ) {
       this.file_reader.readAsDataURL( this.file );
       this.file_reader.addEventListener("load", bind(this, this.insert_raster), false);
+    } else if ("text/x-graphviz" == this.file.type
+            || -1 !== this.file.name.indexOf(".dot") ) {
+      console.info("open file in data view, create graph")
+    } else {
+      console.info(this.file.type)
     }
   }
 }
@@ -335,8 +342,14 @@ fizz.prototype.insert_raster = function () {
 
   this.add_element( this.active_el, id );
 
+  // TODO: detect dimensions
+  // TODO: add checkbox to match canvas image size to raster
+
+  // TODO: add title/desc
+
 
   // this.canvas.appendChild( image_el );
+  this.reset_file_input();
 }
 
 fizz.prototype.insert_svg = function () {
@@ -359,6 +372,13 @@ fizz.prototype.insert_svg = function () {
 //       this.lang = langAttr;
 //     }
 
+  this.reset_file_input();
+}
+
+
+fizz.prototype.reset_file_input = function () {
+  // reset the file input so user can add the same file more than once successively (via 'change' event)
+  this.file_input_button.value = "";
 }
 
 
