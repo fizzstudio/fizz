@@ -153,30 +153,32 @@
         <input name="nav_tabs" type="radio" id="tab-import" class="tab"/>
         <label for="tab-import" class="tab_label import">I/O</label>
         <section class="panel" id="import_pane">
-          <input id="file_input_button" type="file"
-                 accept="image/*, .svg,.png,.jpg,.jpeg,.gif, text/x-graphviz, .gv,.dot">
 
-          <section id="info">
-            <output id="file-name"> </output>
-            <output id="filesize"> </output>
-            <output id="new-filesize"> </output>
-          </section>
+          <div id="import_group" class="control_set">
+            <input id="file_input_button" type="file"
+                   accept="image/*, .svg,.png,.jpg,.jpeg,.gif, text/x-graphviz, .gv,.dot">
 
-          <label for="match_size">Resize Canvas</label>
-          <input type="checkbox" id="match_size" value="match_size" checked>
-          
-          <hr>
+            <section id="info">
+              <output id="file-name"> </output>
+              <output id="filesize"> </output>
+              <output id="new-filesize"> </output>
+            </section>
 
-          <section id="file_save">
-            <label>filename: <input type="text" id="filename_input" value="svg-file"/></label>
-            <select id="filetype_input">
-              <option value="image/svg+xml" selected="selected">.svg</option>
-              <option value="image/png">.png</option>
-            </select>
-            <button id="file_save_button">save</button>            
-          </section>
+            <label for="resize_canvas_checkbox">Resize Canvas</label>
+            <input type="checkbox" id="resize_canvas_checkbox" value="resize_canvas" checked> 
+          </div>
 
-
+          <div id="export_group" class="control_set">
+            <section id="file_save">
+                <label>filename: <input type="text" id="filename_input" value="svg-file"/></label>
+                <select id="filetype_input">
+                  <option value="image/svg+xml" selected="selected">.svg</option>
+                  <option value="image/png">.png</option>
+                </select>
+                <button id="file_save_button">save</button>            
+              </section>            
+          </div>
+        
         </section> 
 
       </div>

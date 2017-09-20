@@ -159,6 +159,7 @@ function fizz( svgroot ) {
   this.file_reader = null;  
   this.file_input_button = document.getElementById( "file_input_button" );
   this.file_save_button = document.getElementById( "file_save_button" );
+  this.resize_canvas_checkbox = document.getElementById( "resize_canvas_checkbox" );
 
   // coordinate variables
   this.coords = this.root.createSVGPoint();
@@ -331,25 +332,56 @@ fizz.prototype.upload_file = function (event) {
 }
 
 fizz.prototype.insert_raster = function () {
-  console.info("insert_raster", this.file_reader)
-  // console.info("insert_raster", this.file.name)
-
-  var dataURL = this.file_reader.result
-  this.active_el = document.createElementNS(this.svgns, "image");
-  this.active_el.setAttributeNS(this.xlinkns, "href", dataURL);
-
-  var id = this.file.name.split(".")[0];
-
-  this.add_element( this.active_el, id );
-
-  // TODO: detect dimensions
-  // TODO: add checkbox to match canvas image size to raster
-
-  // TODO: add title/desc
+  // console.info("insert_raster", this.file_reader)
+  // console.info("insert_raster file", this.file_reader.result)
 
 
-  // this.canvas.appendChild( image_el );
-  this.reset_file_input();
+  var dataURL = this.file_reader.result;
+
+  // get dimensions
+  var img = new Image;
+  img.addEventListener("load", bind(this, function() {
+    // TODO: detect native dimensions
+    var width = img.width;
+    var height = img.height;
+
+    // console.info("width: ", width, "height: ", height ); // image is loaded; sizes are available
+
+    var resize_canvas = this.resize_canvas_checkbox.checked;
+    if (resize_canvas) {
+      // TODO: add checkbox to match canvas image size to raster
+      // TODO: if checkbox changed, change viewbox to match
+      this.canvas.setAttribute("viewBox", "0 0 " + width + " " + height);
+    } else {
+      // TODO: store default viewbox
+      // TODO: define way to set viewbox, keep list of viewbox states
+      this.canvas.removeAttribute("viewBox");
+    }
+
+
+
+    // TODO: change image dimensions (e.g. make it smaller dimensions and filesize)
+
+    // insert raster into SVG
+    this.active_el = document.createElementNS(this.svgns, "image");
+    this.active_el.setAttributeNS(this.xlinkns, "href", dataURL);
+    this.active_el.setAttribute("width", width);
+    this.active_el.setAttribute("height", height);
+
+    var id = this.file.name.split(".")[0];
+
+    this.add_element( this.active_el, id );
+
+
+
+
+    // TODO: add title/desc
+
+    // TODO: allow replacing image, to preserve stacking and coordinate position (and size)
+
+    this.reset_file_input();
+  }), false);
+  img.src = dataURL;
 }
 
 fizz.prototype.insert_svg = function () {
@@ -363,6 +395,8 @@ fizz.prototype.insert_svg = function () {
   file_content = file_content.substring( svg_start );
 
   // insert SVG file into HTML page
+  // TODO: parse and insert each element, including them in treeview
+  // TODO: change from innerHTML, which removes and overwrites all previous content
   this.canvas.innerHTML = file_content;
 
   
@@ -1191,6 +1225,8 @@ fizz.prototype.drop = function (event) {
 
   } else if ( "delete" == this.mode ) {
     if ( this.active_el ) {
+      // TODO: make delete marquee
+
       this.delete_element( this.active_el );
     }
   } else if ( "add-group" == this.mode ) {

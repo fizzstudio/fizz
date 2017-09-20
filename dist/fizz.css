@@ -1,8 +1,9 @@
 /* variables */
 :root {
   --label: #D9D9D9;  /* off-white */
-  --background: #2B2B2B;  /* charcoal */
+  --background: #212121;  /* darker than charcoal */
   --contrast: #2B2B2B; /* charcoal */
+  --contrast-light: #333333;  /* soft gray */
   --highlight: #1A1A1A; /* almostblack */
   --control: #404040; /* dark gray */
   --control-reverse: #9F9F9F;  /* gray */
@@ -128,7 +129,7 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
-  background-color: var(--contrast);
+  background-color: var(--background);
 }
 
   body > section {
@@ -350,6 +351,16 @@ input[type="number"] {
   margin: 0 0 0.25em -5px;
   width: 2.5em;
 }    
+
+.control_set {
+  background-color: var(--contrast-light); 
+  margin-bottom: 0.5em; 
+  padding: 0.2em;
+}
+
+  .control_set label {
+    background-color: var(--contrast-light); 
+  }
 
 /*
 SVG 
