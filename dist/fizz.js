@@ -128,6 +128,9 @@ function fizz( svgroot ) {
   this.active_tree_entry = null;
   this.active_container = null; // containers are group, defs, svg, symbol, etc.
 
+  this.active_width = null;
+  this.active_height = null;
+
   this.active_connector = null;
 
   this.active_scaffold = null;
@@ -300,6 +303,8 @@ fizz.prototype.init = function () {
     // this.active_el.setAttribute("style", this.get_style() );
     // this.selected_el.classList.add("selected");
     // this.selected_el.classList.remove("selected");
+
+  this.resize_canvas_checkbox.addEventListener("change", bind(this, this.resize_canvas), false);  
     
 }
 
@@ -342,31 +347,20 @@ fizz.prototype.insert_raster = function () {
   var img = new Image;
   img.addEventListener("load", bind(this, function() {
     // TODO: detect native dimensions
-    var width = img.width;
-    var height = img.height;
+    this.active_width = img.width;
+    this.active_height = img.height;
+
+    this.resize_canvas();
 
     // console.info("width: ", width, "height: ", height ); // image is loaded; sizes are available
-
-    var resize_canvas = this.resize_canvas_checkbox.checked;
-    if (resize_canvas) {
-      // TODO: add checkbox to match canvas image size to raster
-      // TODO: if checkbox changed, change viewbox to match
-      this.canvas.setAttribute("viewBox", "0 0 " + width + " " + height);
-    } else {
-      // TODO: store default viewbox
-      // TODO: define way to set viewbox, keep list of viewbox states
-      this.canvas.removeAttribute("viewBox");
-    }
-
-
 
     // TODO: change image dimensions (e.g. make it smaller dimensions and filesize)
 
     // insert raster into SVG
     this.active_el = document.createElementNS(this.svgns, "image");
     this.active_el.setAttributeNS(this.xlinkns, "href", dataURL);
-    this.active_el.setAttribute("width", width);
-    this.active_el.setAttribute("height", height);
+    this.active_el.setAttribute("width", this.active_width);
+    this.active_el.setAttribute("height", this.active_height);
 
     var id = this.file.name.split(".")[0];
 
@@ -450,6 +444,41 @@ fizz.prototype.save_file = function () {
 
   DOMURL.revokeObjectURL(url);
   a_el.remove();
+}
+
+
+fizz.prototype.resize_canvas = function ( event, width, height ) {
+  if (!width || !height) {
+    var canvas_bbox = this.canvas.getBBox();
+
+    if (!width) {
+      if ( this.active_width ) {
+        width = this.active_width;
+      } else {
+        // get canvas bbox
+        width = canvas_bbox.width;
+      }
+    }
+
+    if (!height) {
+      if ( this.active_height ) {
+        height = this.active_height;
+      } else {
+        // get canvas bbox
+        height = canvas_bbox.height;
+      }
+    }  
+  }
+
+  // checkbox to match canvas image size to raster; if checkbox changed, change viewbox to match
+  var resize_canvas = this.resize_canvas_checkbox.checked;
+  if (resize_canvas && 0 < width && 0 < height) {
+    this.canvas.setAttribute("viewBox", "0 0 " + width + " " + height);
+  } else {
+    // TODO: store default viewbox
+    // TODO: define way to set viewbox, keep list of viewbox states, maybe as array of states indexed by target element 
+    this.canvas.removeAttribute("viewBox");
+  }
 }
 
 
