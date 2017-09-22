@@ -37,7 +37,7 @@
             }
            
           </style>
-          <defs>
+          <defs id="fizz_library">
             <pattern id="grid10" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
               <rect x="0" y="0" width="10" height="10" style="stroke:var(--canvas); stroke-width:0.1; fill:none;"/>
             </pattern>
@@ -51,21 +51,21 @@
               <path d="M-10,-5 L0,0 -10,5 Z"/>
             </marker>            
 
-            <path id="hexagon" d="M17.5,-30.3 35,0 17.5,30.3 -17.5,30.3 -35,4.3 -17.5,-30.3 17.5,-30.3" />
+            <path id="hexagon-icon-symbol_template" d="M17.5,-30.3 35,0 17.5,30.3 -17.5,30.3 -35,4.3 -17.5,-30.3 17.5,-30.3" />
             <path id="boom" d="M3.2e-15,-53 C5.1,-19.3 1.8,-6.7 20.9,-36.3 C4.9,-4.9 14.1,-14.1 45.8,-26.5 C19.3,-5.1 6.7,-1.8 42,0 C6.7,1.8 19.3,5.1 45.8,26.4 C14.1,14.1 4.9,4.9 21.0,36.3 C1.8,6.7 5.1,19.3 3.2e-15,53 C-5.1,19.3 -1.8,6.7 -20.9,36.3 C-4.9,4.9 -14.1,14.1 -45.8,26.5 C-19.3,5.1 -6.7,1.8 -42,5.1e-15 C-6.7,-1.8 -19.3,-5.1 -45.8,-26.5 C-14.1,-14.1 -4.9,-4.9 -20.9,-36.3 C-1.8,-6.7 -5.1,-19.3 -9.7e-15,-53 "/>
 
-            <svg id="person" viewBox="-29.2,-30 58.4 60" overflow="visible" width="87.6" height="90">
+            <svg id="person-icon-symbol_template" viewBox="-29.2,-30 58.4 60" overflow="visible" width="87.6" height="90">
               <path transform="translate(-58.4,-60)" d="M29.14,40.50 C29.03,40.50 28.92,40.50 28.81,40.50 C25.11,40.34 21.92,37.46 20.53,36.00 M29.08,58.87 C22.70,58.87 16.50,58.55 11.75,57.97 C4.06,57.03 2.33,55.71 1.70,54.79 C1.28,54.19 1.19,53.49 1.45,52.82 C3.80,46.61 7.60,45.15 11.00,44.54 C12.37,44.30 14.64,43.77 16.61,43.15 C19.73,42.17 20.37,41.51 20.46,41.40 C20.51,41.24 20.62,40.75 20.64,39.42 L20.61,37.07 L20.54,36.00 C18.12,33.08 17.32,30.31 17.05,28.93 C16.09,28.51 14.85,27.33 14.11,24.14 C13.62,22.04 13.69,20.75 14.33,19.93 C14.49,19.73 14.69,19.57 14.90,19.45 C13.94,12.58 16.27,8.23 18.48,5.74 C21.02,2.87 23.92,1.84 24.04,1.80 L24.07,1.79 L24.09,1.78 C25.54,1.35 26.92,1.12 28.20,1.12 L29.14,1.11 M37.75,36.00 C36.36,37.46 33.17,40.34 29.47,40.50 C29.36,40.50 29.25,40.50 29.14,40.50 M29.14,1.11 L30.08,1.12 C31.36,1.12 32.74,1.35 34.19,1.78 L34.21,1.79 L34.24,1.80 C34.36,1.84 37.26,2.87 39.80,5.74 C42.01,8.23 44.34,12.58 43.38,19.45 C43.59,19.57 43.79,19.73 43.95,19.93 C44.59,20.75 44.66,22.04 44.17,24.14 C43.43,27.33 42.19,28.51 41.23,28.92 C40.96,30.31 40.16,33.08 37.74,36.00 L37.67,37.07 L37.64,39.42 C37.66,40.75 37.77,41.24 37.82,41.40 C37.91,41.51 38.55,42.17 41.67,43.15 C43.64,43.77 45.91,44.30 47.28,44.54 C50.68,45.15 54.48,46.61 56.83,52.82 C57.09,53.49 57.00,54.19 56.58,54.79 C55.95,55.71 54.22,57.03 46.53,57.97 C41.78,58.55 35.58,58.87 29.08,58.87"/>
             </svg>
 
 
-            <svg id="gear" viewBox="3 4 18 18" width="90" height="90">
+            <svg id="gear-icon-symbol_template" viewBox="3 4 18 18" width="90" height="90">
                 <!-- <rect x="3" y="4" width="100%" height="100%" fill="yellow" stroke="" stroke-width=""/> -->
               <path d="M20,14.5v-2.9 l-1.8-0.3c-0.1-0.4-0.3-0.8-0.6-1.4 l1.1-1.5l-2.1-2.1l-1.5,1.1 c-0.5-0.3-1-0.5-1.4-0.6L13.5,5h-2.9 l-0.3,1.8 C9.8,6.9,9.4,7.1,8.9,7.4 L7.4,6.3L5.3,8.4l1,1.5c-0.3,0.5-0.4,0.9-0.6,1.4 L4,11.5v2.9l1.8,0.3c0.1,0.5,0.3,0.9,0.6,1.4 l-1,1.5 l2.1,2.1l1.5-1c0.4,0.2,0.9,0.4,1.4,0.6 l0.3,1.8h3l0.3-1.8c0.5-0.1,0.9-0.3,1.4-0.6l1.5,1.1l2.1-2.1l-1.1-1.5c0.3-0.5,0.5-1,0.6-1.4 L20,14.5z M12,16c-1.7,0-3-1.3-3-3s1.3-3,3-3s3,1.3,3,3S13.7,16,12,16z" />
             </svg>
 
 
-            <svg id="gear2" viewBox="30 40 180 180" width="90" height="90">
+            <svg id="gear2-icon-symbol_template" viewBox="30 40 180 180" width="90" height="90">
                 <!-- <rect x="3" y="4" width="100%" height="100%" fill="yellow" stroke="" stroke-width=""/> -->
               <path d="M200, 145
                         v-29 
@@ -111,19 +111,19 @@
                         S137, 160, 120, 160
 
 
-            <svg id="document" viewBox="-47.5 60 95 120" width="71.25" height="90" overflow="visible">
+            <svg id="document-icon-symbol_template" viewBox="-47.5 60 95 120" width="71.25" height="90" overflow="visible">
               <path transform="translate(-95,0)"
                 d="M6,5 H70 L90,25 V114 Q90,115 89,115 H6 Q5,115 5,114 V6 Q5,5 6,5 M90,25 H71 Q70,25 70,24 V5 M35,20 H60 M20,30 H75 M20,40 H75 M20,50 H50 M20,60 H50 M20,70 H50 M20,80 H75 M20,90 H75 M20,100 H75 M55,50 H73 V70 H55 Z"/>
             </svg>
 
-            <svg id="blank-document" viewBox="-47.5 60 95 120" width="71.25" height="90" overflow="visible">
+            <svg id="blank-document-icon-symbol_template" viewBox="-47.5 60 95 120" width="71.25" height="90" overflow="visible">
               <path transform="translate(-95,0)" stroke-linejoin="round"
                 d="M6,5 H70 L90,25 V114 Q90,115 89,115 H6 Q5,115 5,114 V6 Q5,5 6,5 M90,25 H71 Q70,25 70,24 V5"/>
             </svg>
 
 
             
-            <svg id="database" viewBox="0 0 108 124" width="78.4" height="90" overflow="visible">
+            <svg id="database-icon-symbol_template" viewBox="0 0 108 124" width="78.4" height="90" overflow="visible">
               <path d="M-51,-36 A51,23 0 1,1 51,-36 V36 A51,23 0 1,1 -51,36 Z M51,-36 A51,23 0 0,1 -51,-36 M51,-12 A51,23 0 0,1 -51,-12 M51,12 A51,23 0 0,1 -51,12" />
             <!-- <rect x="-54" y="-62" width="108" height="126" fill="yellow" stroke="red" stroke-width="1" fill-opacity="0.5"/>
               <path d="M-54,-62 L54,62 M54,-62 L-54,62" stroke-width="1" stroke="red" fill="none"/> -->    
@@ -209,14 +209,14 @@
           <summary>symbols</summary> 
           <div>
             <ul id="colors" role="listbox" data-type="symbol" tabindex="1">
-              <li role="option" tabindex="1" aria-selected="true" tabindex="1">person</li>
-              <li role="option" tabindex="1" aria-selected="false">hexagon</li>
-              <li role="option" tabindex="1" aria-selected="false">boom</li>
-              <li role="option" tabindex="1" aria-selected="false">document</li>
-              <li role="option" tabindex="1" aria-selected="false">blank-document</li>
-              <li role="option" tabindex="1" aria-selected="false">database</li>
-              <li role="option" tabindex="1" aria-selected="false">gear</li>
-              <li role="option" tabindex="1" aria-selected="false">gear2</li>
+              <li role="option" tabindex="1" aria-selected="true" tabindex="1" data-value="person-icon-symbol_template">person</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="hexagon-icon-symbol_template">hexagon</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="boom-icon-symbol_template">boom</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="document-icon-symbol_template">document</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="blank-document-icon-symbol_template">blank document</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="database-icon-symbol_template">database</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="gear-icon-symbol_template">gear</li>
+              <li role="option" tabindex="1" aria-selected="false" data-value="gear2-icon-symbol_template">gear2</li>
             </ul>
           </div>
         </details>
@@ -248,18 +248,18 @@
           <summary>stroke</summary> 
           <div>
             <ul id="colors" role="picker" data-property="stroke" tabindex="1">
-              <li role="option" tabindex="1" tabindex="1" aria-selected="true" style="color:black; background-color:black;">black</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:gray; background-color:gray;">gray</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;">white</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#e41a1c; background-color:#e41a1c;">#e41a1c</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#377eb8; background-color:#377eb8;">#377eb8</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#4daf4a; background-color:#4daf4a;">#4daf4a</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#984ea3; background-color:#984ea3;">#984ea3</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#ff7f00; background-color:#ff7f00;">#ff7f00</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#ffff33; background-color:#ffff33;">#ffff33</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#a65628; background-color:#a65628;">#a65628</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#f781bf; background-color:#f781bf;">#f781bf</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" class="none">none</li> 
+              <li role="option" tabindex="1" tabindex="1" aria-selected="true" style="color:black; background-color:black;" data-value="black">black</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:gray; background-color:gray;" data-value="gray">gray</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" data-value="white">white</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#e41a1c; background-color:#e41a1c;" data-value="#e41a1c">#e41a1c</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#377eb8; background-color:#377eb8;" data-value="#377eb8">#377eb8</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#4daf4a; background-color:#4daf4a;" data-value="#4daf4a">#4daf4a</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#984ea3; background-color:#984ea3;" data-value="#984ea3">#984ea3</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#ff7f00; background-color:#ff7f00;" data-value="#ff7f00">#ff7f00</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#ffff33; background-color:#ffff33;" data-value="#ffff33">#ffff33</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#a65628; background-color:#a65628;" data-value="#a65628">#a65628</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#f781bf; background-color:#f781bf;" data-value="#f781bf">#f781bf</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" class="none" data-value="none">none</li> 
             </ul>  
 
             <label for="stroke-width">width:</label>
@@ -274,18 +274,18 @@
           <summary>fill</summary> 
           <div>
             <ul id="colors" role="picker" data-property="fill" tabindex="1">
-              <li role="option" tabindex="1" tabindex="1" aria-selected="true" style="color:black; background-color:black;">black</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:gray; background-color:gray;">gray</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;">white</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#e41a1c; background-color:#e41a1c;">#e41a1c</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#377eb8; background-color:#377eb8;">#377eb8</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#4daf4a; background-color:#4daf4a;">#4daf4a</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#984ea3; background-color:#984ea3;">#984ea3</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#ff7f00; background-color:#ff7f00;">#ff7f00</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#ffff33; background-color:#ffff33;">#ffff33</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#a65628; background-color:#a65628;">#a65628</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:#f781bf; background-color:#f781bf;">#f781bf</li>
-              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" class="none">none</li>
+              <li role="option" tabindex="1" tabindex="1" aria-selected="true" style="color:black; background-color:black;" data-value="black">black</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:gray; background-color:gray;" data-value="gray">gray</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" data-value="white">white</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#e41a1c; background-color:#e41a1c;" data-value="#e41a1c">#e41a1c</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#377eb8; background-color:#377eb8;" data-value="#377eb8">#377eb8</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#4daf4a; background-color:#4daf4a;" data-value="#4daf4a">#4daf4a</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#984ea3; background-color:#984ea3;" data-value="#984ea3">#984ea3</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#ff7f00; background-color:#ff7f00;" data-value="#ff7f00">#ff7f00</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#ffff33; background-color:#ffff33;" data-value="#ffff33">#ffff33</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#a65628; background-color:#a65628;" data-value="#a65628">#a65628</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:#f781bf; background-color:#f781bf;" data-value="#f781bf">#f781bf</li>
+              <li role="option" tabindex="1" aria-selected="false" style="color:white; background-color:white;" class="none" data-value="none">none</li>
             </ul>  
 
             <label for="fill-opacity">opacity:</label>

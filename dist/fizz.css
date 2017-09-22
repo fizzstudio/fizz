@@ -401,7 +401,8 @@ svg {
   }
 
 svg#canvas {
-   pointer-events: all; 
+  pointer-events: all; 
+  cursor: crosshair;
 }
 
 rect#backdrop {
@@ -409,6 +410,11 @@ rect#backdrop {
   /*stroke: var(--control);*/
   fill: none;
   pointer-events: all;
+  cursor: crosshair;
+}
+
+g#scaffolds {
+  cursor: crosshair;
 }
   
 nav::-webkit-scrollbar-track, aside::-webkit-scrollbar-track {

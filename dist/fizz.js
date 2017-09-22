@@ -119,6 +119,9 @@ function fizz( svgroot ) {
   this.canvas = this.root.getElementById("canvas");
   this.scaffolds = this.root.getElementById("scaffolds");
   this.treeview = document.getElementById("treeview");
+
+  this.library = this.root.getElementById("fizz_library");
+  this.canvas_defs = null;
   
   this.elements = []; // array of object for all graphical elements in the document
   this.connectors = [];
@@ -237,7 +240,7 @@ function fizz( svgroot ) {
   this.active_text_style = this.default_text_style;  
 
   this.values = {
-    "symbol": "person"
+    "symbol": "person-icon-symbol_template"
   };
 
   // constants
@@ -756,11 +759,15 @@ fizz.prototype.draw_freehand = function () {
 }
 
 fizz.prototype.draw_use = function () {
+  var symbol = this.library.querySelector( "#" + this.values["symbol"] );
+  var symbol_copy = symbol.cloneNode(true);
+  var symbol_id = this.add_to_canvas_defs( symbol_copy );
+
   this.active_el = document.createElementNS(this.svgns, "use");
   this.add_element( this.active_el );
   this.active_el.setAttribute("x", this.coords.x );
   this.active_el.setAttribute("y", this.coords.y );
-  this.active_el.setAttributeNS(this.xlinkns, "href", "#" + this.values["symbol"]);
+  this.active_el.setAttributeNS(this.xlinkns, "href", "#" + symbol_id);
   this.active_el.setAttribute("style", this.get_style());
 
   this.update_element( this.active_el );
@@ -1446,6 +1453,41 @@ fizz.prototype.get_elements_by_type = function ( type ) {
 
 
 
+fizz.prototype.add_to_canvas_defs = function ( el ) {
+  if (!this.canvas_defs) {
+    this.canvas_defs = document.createElementNS(this.svgns, "defs");
+
+    // Insert defs as the first child
+    // TODO: remove blank defs if it's not used when file is saved
+    this.canvas.insertBefore(this.canvas_defs, this.canvas.firstChild);
+  }
+
+  var el_id = el.id;
+  var new_id = null;
+  var preexisting_el = null;
+
+  if ( !el_id ) {
+    // new element that needs an id, like a paint server or custom symbol
+    new_id = generate_unique_id( el.localName );
+  } else {
+    // if symbol, rename id
+    new_id = el_id.replace("-symbol_template", "");
+
+    // check if element already exists in canvas defs, like symbol used multiple times
+    preexisting_el = this.canvas_defs.querySelector( "#" + new_id );
+  }
+
+  if ( !preexisting_el ) {
+    el.setAttribute( "id", new_id );
+    this.canvas_defs.appendChild( el );
+  }
+
+  return new_id;
+}
+
+
+
+
 fizz.prototype.select = function ( target_el, multiple ) {
   if ( !target_el ) {
     target_el = this.active_el;
@@ -1758,18 +1800,19 @@ fizz.prototype.handle_dropdown = function (event) {
   }
   target.setAttribute("aria-selected", "true" );
   var prop = target.parentNode.getAttribute("data-property");
+  var value = target.getAttribute("data-value");
   if ( prop ) {
-    this.active_style[prop] = target.textContent;
+    this.active_style[prop] = value;
   } else {
     var datatype = target.parentNode.getAttribute("data-type");
-    this.values[datatype] = target.textContent;
+    this.values[datatype] = value;
   }
   this.deactivate_nodes();
 }
 
 fizz.prototype.handle_picker = function (event) {
   var target = event.target;
-  var value = target.textContent;
+  var value = target.getAttribute("data-value");
   var options = target.parentNode.querySelectorAll("[role=option]")
   for (var o = 0, oLen = options.length; oLen > o; ++o) {
     var eachOption = options[o];
