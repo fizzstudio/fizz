@@ -1,0 +1,12 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "formatter": "verbose",
+    "jsRules": {},
+    "rules": {
+        "only-arrow-functions": false
+    },
+    "rulesDirectory": []
+}

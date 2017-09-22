@@ -32,12 +32,15 @@
   ],
   "license": "BSD-3-Clause",
   "dependencies": {
-    "electron": "^1.6.11"
+    "electron": "^1.6.11",
+    "requirejs": "*",
+    "typescript": "^2.5.2"
   },
   "devDependencies": {
+    "@types/mocha": "^2.2.42",
     "mocha": "^3.4.2",
+    "tslint": "^5.7.0",
     "xmldom": "^0.1.27"
-    "electron": "^1.6.11"
   },
   "scripts": {
     "deploy": "scripts/deploy.sh",
@@ -46,6 +49,6 @@
     "prestart": "tsc -p .",
     "start": "electron .",
     "pretest": "tsc -p .",
-    "test": "mocha tests"
+    "test": "mocha dist/tests"
   }
 }
