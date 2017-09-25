@@ -365,11 +365,14 @@ input[type="number"] {
 /*
 SVG 
 */  
-svg {
+svg#fizz {
+  /*
   width: 1000px;
   height: 1000px;
   width: 1000px;
   height: 700px;
+  */
+
   width: 100%;
   height: 100%;
 
@@ -379,6 +382,7 @@ svg {
   cursor: default;
 
   /*pointer-events: all !important;*/
+  cursor: crosshair;
 }
 
 *[role="button"] {
@@ -405,16 +409,31 @@ svg#canvas {
   cursor: crosshair;
 }
 
+  svg#canvas.grab {
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    cursor: grab;  
+  }
+
+  svg#canvas.drag {
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+  }
+
+  svg#canvas.copy {
+    cursor: copy; 
+  }
+
+  svg#canvas.delete {
+    cursor: not-allowed; 
+  }
+
 rect#backdrop {
   /*fill: url(#grid100);*/
   /*stroke: var(--control);*/
   fill: none;
   pointer-events: all;
-  cursor: crosshair;
-}
-
-g#scaffolds {
-  cursor: crosshair;
 }
   
 nav::-webkit-scrollbar-track, aside::-webkit-scrollbar-track {

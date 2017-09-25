@@ -973,6 +973,8 @@ fizz.prototype.grab = function (event) {
           }
 
           if ( "drag" == this.mode ) {
+            this.set_cursor( "drag" );
+
             // TODO: refactor for multiple selections
             this.active_obj = this.elements.find( match_element, this.active_el );
             // console.log(this.active_obj)
@@ -1036,6 +1038,7 @@ fizz.prototype.drag = function (event) {
     var drag_x = 0;
     var drag_y = 0;
     if ( this.active_el ) {
+      this.set_cursor( "drag" );
       drag_x = this.coords.x - this.originpoint.x.toFixed(2);
       drag_y = this.coords.y - this.originpoint.y.toFixed(2);
 
@@ -1255,11 +1258,13 @@ fizz.prototype.drop = function (event) {
   } else if ( "select" == this.mode ) {
     this.reset();
   } else if ( "drag" == this.mode ) {
+    this.set_cursor( "grab" );
     this.active_el = null;
 
     // TODO: convert transform into geometry attributes(optionally)
 
   } else if ( "delete" == this.mode ) {
+    // this.set_cursor( "delete" );
     if ( this.active_el ) {
       // TODO: make delete marquee
 
@@ -1330,6 +1335,11 @@ fizz.prototype.delete_element = function ( el ) {
 
 fizz.prototype.copy_element = function ( el ) {
   this.active_el = el.cloneNode(true);
+
+  // make sure copied element has unique id, derived from original id, to maintain relationship
+  var id = this.active_el.id;
+  this.active_el.removeAttribute("id");
+
   // var t = this.active_el.transform;
   // var ctm = this.active_el.getCTM();
   // var c_x = ctm.e + 10;
@@ -1354,7 +1364,7 @@ fizz.prototype.copy_element = function ( el ) {
   }
 
   this.active_el.setAttribute("transform", transforms );
-  this.add_element( this.active_el );
+  this.add_element( this.active_el, id, true );
 }
 
 
@@ -1366,9 +1376,17 @@ fizz.prototype.handle_text_input = function ( event ) {
 }
 
 
+fizz.prototype.set_cursor = function ( mode ) {
+  this.canvas.classList = "";
+  if ( mode && "none" != mode ) {
+    this.canvas.classList.add( mode );
+  }
+}
+
+
 
 /* Element Manager */
-fizz.prototype.add_element = function ( el, id ) {
+fizz.prototype.add_element = function ( el, id, is_copy ) {
     // console.log("add_element");
   if ( !el ) {
     el = this.active_el;
@@ -1378,6 +1396,8 @@ fizz.prototype.add_element = function ( el, id ) {
     if ( !el.id ) {
       if (!id) {
         id = generate_unique_id( el.localName );
+      } else if ( is_copy ) {
+        id = generate_unique_id( id );
       }
       el.setAttribute( "id", id );
     }
@@ -1780,13 +1800,26 @@ fizz.prototype.handle_buttons = function (event) {
   this.deactivate_nodes();
 
   // trigger modes that activate immediately without interacting with the canvas
+  this.set_cursor();
   switch (this.mode) {
+    case "drag":
+      this.set_cursor("grab");
+      break;
+
+    case "copy":
+      this.set_cursor("copy");
+      break;
+
+    case "delete":
+      this.set_cursor("delete");
+      break;
+
     case "add-group":
       if ( this.selected_el_list.length ){
         // activate group button when pressed, without need to click canvas, group selected elements
         this.create_group();
         this.add_to_container( this.selected_el_list );
-     }
+      }
       break;
   }
 }
