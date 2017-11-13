@@ -166,10 +166,10 @@ function fizz( svgroot ) {
   this.resize_canvas_checkbox = document.getElementById( "resize_canvas_checkbox" );
 
   // find and replace
-  this.search = document.getElementById( "search" );
-  this.search_submit = document.getElementById( "search_submit" );
-  this.search_replace = document.getElementById( "search-replace" );
-  this.search_replace_submit = document.getElementById( "search-replace_submit" );
+  this.search_input = document.getElementById( "search_input" );
+  this.search_button = document.getElementById( "search_button" );
+  this.search_replace = document.getElementById( "search_replace" );
+  this.search_replace_button = document.getElementById( "search_replace_button" );
 
   // coordinate variables
   this.coords = this.root.createSVGPoint();
@@ -302,8 +302,8 @@ fizz.prototype.init = function () {
   this.manage_panes();
 
   // find and replace
-  this.search_submit.addEventListener("click", bind(this, this.handle_search), false);
-  this.search_replace_submit.addEventListener("click", bind(this, this.handle_search), false);
+  this.search_button.addEventListener("click", bind(this, this.handle_search), false);
+  this.search_replace_button.addEventListener("click", bind(this, this.handle_search), false);
 
 
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
@@ -1888,7 +1888,7 @@ fizz.prototype.handle_keys = function (event) {
 fizz.prototype.handle_search = function ( event ) {
   var target = event.target;
 
-  var search_str = this.search.value;
+  var search_str = this.search_input.value;
 
   if ( search_str ) {
     for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
@@ -1902,7 +1902,7 @@ fizz.prototype.handle_search = function ( event ) {
           tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
 
           // check for replace
-          if (target === this.search_replace_submit) {
+          if (target === this.search_replace_button) {
             var replace_str = this.search_replace.value;
             if ( replace_str ) {
               var attr = "id";

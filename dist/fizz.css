@@ -561,7 +561,7 @@ ul[role="listbox"] li[aria-selected="true"] {
 
 /* search and replace box*/
 
-#search-replace-group {
+#search_replace_group {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -570,15 +570,15 @@ ul[role="listbox"] li[aria-selected="true"] {
   height: 100%;
 }
 
-  #searchbox, #search-replace-box {
+  #search_box, #search_replace_box {
     display: flex;
     width: 12rem;
   }
 
-    #searchbox input,
-    #searchbox button, 
-    #search-replace-box input,
-    #search-replace-box button {
+    #search_box input,
+    #search_box button, 
+    #search_replace_box input,
+    #search_replace_box button {
       height: 1.8rem;
       padding: 0.3rem 0.75rem;
       border: none;
@@ -586,12 +586,12 @@ ul[role="listbox"] li[aria-selected="true"] {
       text-decoration: none;
     }
 
-    #searchbox input, #search-replace-box input {
+    #search_box input, #search_replace_box input {
       flex: 1 0 20rem;
       background-color: var(--label);
     }
 
-    #searchbox button, #search-replace-box button  {
+    #search_box button, #search_replace_box button  {
       flex: 0 0 auto;
       font-family: Roboto, sans-serif;
       background-color: var(--control);
