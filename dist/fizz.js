@@ -1891,27 +1891,34 @@ fizz.prototype.handle_search = function ( event ) {
   var search_str = this.search_input.value;
 
   if ( search_str ) {
+    // TODO: start next search after current search selection
+
     for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
       var each_obj = this.elements[ e ];
+      var tree_item = each_obj.tree_item;
 
-      // TODO: search across all elements and attributes and text content, not just 'id'
-      if ( each_obj.id === search_str ) {
-        var tree_item = each_obj.tree_item;
-        if ( tree_item ) {
+      // search across all elements, attributes, and text content for a matching string
+      var attr_value_els = tree_item.element.querySelectorAll("[data-attribute] > span.value");
+      for (var a = 0, a_len = attr_value_els.length; a_len > a; ++a) {
+        var each_attr_value_el = attr_value_els[ a ];
+        var val = each_attr_value_el.textContent;
+        if (-1 != val.indexOf(search_str)) {
+          var attr = each_attr_value_el.parentNode.getAttribute("data-attribute");
+
           tree_item.element.classList.add("selected");
           tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
 
           // check for replace
           if (target === this.search_replace_button) {
             var replace_str = this.search_replace.value;
-            if ( replace_str ) {
-              var attr = "id";
-              var attr_value_el = tree_item.element.querySelector("[data-attribute=" + "id" + "] > span.value");
-              attr_value_el.textContent = replace_str;  
-              var blur_event = new FocusEvent("blur");
-              attr_value_el.dispatchEvent(blur_event);
-            }
+            var attr_value_el = tree_item.element.querySelector("[data-attribute=" + attr + "] > span.value");
+            var new_val = val.replace(search_str, replace_str);
+            attr_value_el.textContent = new_val;  
+            var blur_event = new FocusEvent("blur");
+            attr_value_el.dispatchEvent(blur_event);            
           }
+
+          return;
         }
       }
     }  
