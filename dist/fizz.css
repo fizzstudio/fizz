@@ -127,7 +127,7 @@ article {
 
   /* start Workspace Layout */
   /* Create Workspace Layout */
-  article#pane_create_workspace {
+  article#workspace_create {
     grid-template-columns:
       [navbar-start] 24rem
       [navbar-end content-start] 1fr
@@ -138,12 +138,12 @@ article {
       [content-row-end];
   }
 
-    article#pane_create_workspace > main {
+    article#workspace_create > main {
       grid-column: content-start / content-end;
       grid-row: content-row-start / content-row-end;
     }
 
-      article#pane_create_workspace > main > section {
+      article#workspace_create > main > section {
         background-color: var(--canvas);
         height: 100%;
         width: 100%;
@@ -153,16 +153,16 @@ article {
       }
 
 
-    article#pane_create_workspace > aside#create_panes {
+    article#workspace_create > aside#create_panes {
       grid-column: navbar-start / navbar-end;
       grid-row: content-row-start / content-row-end;
     }
 
-      article#pane_create_workspace > aside#create_panes > section[aria-current=false] {
+      article#workspace_create > aside#create_panes > section[aria-current=false] {
         display: none;
       }
 
-      article#pane_create_workspace > aside#create_panes > section[aria-current=true] {
+      article#workspace_create > aside#create_panes > section[aria-current=true] {
         background-color: var(--contrast);
       }
 
@@ -188,14 +188,14 @@ article {
           grid-row: trees-start / trees-end;
         }
 
-    article#pane_create_workspace > aside#controls {
+    article#workspace_create > aside#controls {
       grid-column: controls-start / controls-end;
       grid-row: content-row-start / content-row-end;
     }
 
 
   /* Animate Workspace Layout */
-  article#pane_animate_workspace {
+  article#workspace_animate {
     grid-template-columns:
       [controls-start timeline-column-start] 24rem
       [controls-end main-start] 1fr
@@ -206,25 +206,25 @@ article {
       [timeline-row-end];
   }
 
-    article#pane_animate_workspace > aside {
+    article#workspace_animate > aside {
       grid-column: controls-start / controls-end;
       grid-row: content-row-start / content-row-end;
     }
 
-    article#pane_animate_workspace > main {
+    article#workspace_animate > main {
       grid-column: main-start / main-end;
       grid-row: content-row-start / content-row-end;
     }
 
-    article#pane_animate_workspace > section#pane_animate_timeline {
+    article#workspace_animate > section#pane_animate_timeline {
       grid-column: timeline-column-start / timeline-column-end;
       grid-row: timeline-row-start / timeline-row-end;
     }
 
 
   /* other Workspace Layout */
-  article#pane_code_workspace,
-  article#pane_view_workspace {
+  article#workspace_code,
+  article#workspace_view {
     grid-template-columns:
       [controls-start] 24rem
       [controls-end main-start] 1fr
@@ -234,14 +234,14 @@ article {
       [content-row-end];
   }
 
-    article#pane_code_workspace > aside ,
-    article#pane_view_workspace > aside {
+    article#workspace_code > aside ,
+    article#workspace_view > aside {
       grid-column: controls-start / controls-end;
       grid-row: content-row-start / content-row-end;
     }
 
-    article#pane_code_workspace > main ,
-    article#pane_view_workspace > main {
+    article#workspace_code > main ,
+    article#workspace_view > main {
       grid-column: main-start / main-end;
       grid-row: content-row-start / content-row-end;
     }
@@ -425,15 +425,20 @@ ul#element_treeview {
     font-size: smaller;
   }
 
+    ul#element_treeview ul.attributes li.selected {
+      box-shadow: 0 0 0.2rem 0.2rem var(--control_highlight);
+    }
+
     ul#element_treeview b.attribute::after {
      content: ": ";
      font-weight: bold;
     }
 
-    ul#element_treeview li.selected {
-      outline: none;
-      background-color: var(--control);
-    }
+  ul#element_treeview li.selected {
+    outline: none;
+    background-color: var(--control);
+  }  
+}
 
 /*
 uncomment when we add toggle buttons to treeview items
@@ -626,5 +631,5 @@ svg#fizz {
   outline: hsla(219, 79%, 66%, 0.8) 3px dashed;
   /*hsl(219, 79, 66)*/
 }
-  
+
 

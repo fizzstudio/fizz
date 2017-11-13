@@ -15,10 +15,10 @@
 
       <section id="top_controls">
         <ul id="workspace_switch" role="radiogroup" data-role="pane_switch" data-pane_group="workspace">
-          <li id="button-create" role="radio" aria-checked="true" tabindex="0" data-pane_group="workspace" data-pane="pane_create_workspace">create</li>
-          <li id="button-animate" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="pane_animate_workspace">animate</li>
-          <li id="button-code" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="pane_code_workspace">code</li>
-          <li id="button-view" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="pane_view_workspace">view</li>
+          <li id="button-create" role="radio" aria-checked="true" tabindex="0" data-pane_group="workspace" data-pane="workspace_create">create</li>
+          <li id="button-animate" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="workspace_animate">animate</li>
+          <li id="button-code" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="workspace_code">code</li>
+          <li id="button-view" role="radio" aria-checked="false" tabindex="0" data-pane_group="workspace" data-pane="workspace_view">view</li>
         </ul>
       </section>
 
@@ -27,7 +27,7 @@
     <!-- start panes -->
 
       <!-- create pane -->
-      <article id="pane_create_workspace" role="region" data-pane_group="workspace" aria-labelledby="button-create" aria-current="true">
+      <article id="workspace_create" role="region" data-pane_group="workspace" aria-labelledby="button-create" aria-current="true">
         <main>
           <section id="drawing-area" contenteditable="true">
             <svg id="fizz">
@@ -334,7 +334,7 @@
       </article>
 
       <!-- animate pane -->
-      <article id="pane_animate_workspace" role="region" data-pane_group="workspace" aria-labelledby="button-animate" aria-current="false">
+      <article id="workspace_animate" role="region" data-pane_group="workspace" aria-labelledby="button-animate" aria-current="false">
         <aside id="animate_controls" class="area sidebar">animate controls</aside> 
         <section id="pane_animate_timeline">animate timeline</section> 
 
@@ -342,14 +342,14 @@
       </article>      
 
       <!-- viewer pane -->
-      <article id="pane_code_workspace" role="region" data-pane_group="workspace" aria-labelledby="button-code" aria-current="false">
+      <article id="workspace_code" role="region" data-pane_group="workspace" aria-labelledby="button-code" aria-current="false">
         <aside id="code_controls" class="area sidebar">code controls</aside> 
 
         <main>code</main>
       </article>      
 
       <!-- viewer pane -->
-      <article id="pane_view_workspace" role="region" data-pane_group="workspace" aria-labelledby="button-view" aria-current="false">
+      <article id="workspace_view" role="region" data-pane_group="workspace" aria-labelledby="button-view" aria-current="false">
         <aside id="view_controls" class="area sidebar">view controls</aside> 
 
         <main>view</main>
@@ -368,7 +368,7 @@
         </section>
 
         <section id="search_replace_box">
-          <input id="search_replace" type="text" placeholder="replacement text">
+          <input id="search_replace_input" type="text" placeholder="replacement text">
           <button id="search_replace_button">Replace</button>
         </section>
       </section>

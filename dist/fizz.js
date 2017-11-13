@@ -155,9 +155,10 @@ function fizz( svgroot ) {
   this.mode = "draw-dot";
 
   this.panes = [];
+  this.active_workspace = "workspace_create";
+
 
   // file upload variables
-
   this.file = null;
   this.file_type = null;
   this.file_reader = null;  
@@ -168,8 +169,9 @@ function fizz( svgroot ) {
   // find and replace
   this.search_input = document.getElementById( "search_input" );
   this.search_button = document.getElementById( "search_button" );
-  this.search_replace = document.getElementById( "search_replace" );
+  this.search_replace_input = document.getElementById( "search_replace_input" );
   this.search_replace_button = document.getElementById( "search_replace_button" );
+  this.current_search_result = null;
 
   // coordinate variables
   this.coords = this.root.createSVGPoint();
@@ -304,6 +306,7 @@ fizz.prototype.init = function () {
   // find and replace
   this.search_button.addEventListener("click", bind(this, this.handle_search), false);
   this.search_replace_button.addEventListener("click", bind(this, this.handle_search), false);
+  this.search_input.addEventListener("change", bind(this, this.reset_search), false);
 
 
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
@@ -1562,6 +1565,7 @@ fizz.prototype.select = function ( target_el, multiple ) {
     target_el.classList.add("selected");
     var target_obj = this.elements.find( match_element, target_el );
     target_obj.tree_item.element.classList.add("selected");
+    target_obj.tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
 
     // if ( !multiple && this.selected_el ) {
     //   // deselect current selected element
@@ -1892,43 +1896,76 @@ fizz.prototype.handle_keys = function (event) {
 }
 
 fizz.prototype.handle_search = function ( event ) {
-  var target = event.target;
+  var target = event.target;  
 
   var search_str = this.search_input.value;
 
   if ( search_str ) {
-    // TODO: start next search after current search selection
+    // start next search after current search selection
+    var is_next_item = true;
+    var is_replace_current = true;
+    if (this.current_search_result) {
+      var last_obj = this.elements[this.elements.length - 1];
+      if (!last_obj.tree_item.element.contains( this.current_search_result )) {
+        is_next_item = false;
+      }
+
+      // if replace, replace current item, not next one
+      if (target === this.search_replace_button) {
+        var replace_str = this.search_replace_input.value;
+        this.replace_search_result( this.current_search_result, search_str, replace_str ); 
+        is_replace_current = false;
+      }
+    }
 
     for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
       var each_obj = this.elements[ e ];
-      var tree_item = each_obj.tree_item;
+      if (!is_next_item) {
+        if (each_obj.tree_item.element.contains( this.current_search_result )) {
+          is_next_item = true;
+        }
+      } else {
+        var tree_item = each_obj.tree_item;
 
-      // search across all elements, attributes, and text content for a matching string
-      var attr_value_els = tree_item.element.querySelectorAll("[data-attribute] > span.value");
-      for (var a = 0, a_len = attr_value_els.length; a_len > a; ++a) {
-        var each_attr_value_el = attr_value_els[ a ];
-        var val = each_attr_value_el.textContent;
-        if (-1 != val.indexOf(search_str)) {
-          var attr = each_attr_value_el.parentNode.getAttribute("data-attribute");
+        // search across all elements, attributes, and text content for a matching string
+        var attr_value_els = tree_item.element.querySelectorAll("[data-attribute] > span.value");
+        for (var a = 0, a_len = attr_value_els.length; a_len > a; ++a) {
+          var each_attr_value_el = attr_value_els[ a ];
+          var val = each_attr_value_el.textContent;
+          if (-1 != val.indexOf(search_str)) {
+            var attr = each_attr_value_el.parentNode.getAttribute("data-attribute");
 
-          tree_item.element.classList.add("selected");
-          tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
+            // TODO: highlight which value in object is current selection (e.g. id=circle-100, x=100, y=100)
+            // TODO: account for multiple matches within a single item (e.g. id=circle-100, x=100, y=100)
 
-          // check for replace
-          if (target === this.search_replace_button) {
-            var replace_str = this.search_replace.value;
-            var attr_value_el = tree_item.element.querySelector("[data-attribute=" + attr + "] > span.value");
-            var new_val = val.replace(search_str, replace_str);
-            attr_value_el.textContent = new_val;  
-            var blur_event = new FocusEvent("blur");
-            attr_value_el.dispatchEvent(blur_event);            
+            this.current_search_result = each_attr_value_el;
+
+            this.select(each_obj.element, false);
+
+            // check for replace
+            if (is_replace_current && target === this.search_replace_button) {
+              var replace_str = this.search_replace_input.value;
+              this.replace_search_result( each_attr_value_el, search_str, replace_str ); 
+            }
+
+            return;
           }
-
-          return;
         }
       }
     }  
   }
+}
+
+fizz.prototype.replace_search_result = function ( attr_value_el, search_str, replace_str ) {
+  var val = attr_value_el.textContent;
+  var new_val = val.replace(search_str, replace_str);
+  attr_value_el.textContent = new_val;  
+  var blur_event = new FocusEvent("blur");
+  attr_value_el.dispatchEvent(blur_event);    
+}
+
+fizz.prototype.reset_search = function ( event ) {
+  this.current_search_result = null;
 }
 
 
@@ -2186,6 +2223,8 @@ fizz.prototype.reset = function ( clear_selected ) {
   if ( clear_selected ) {
     this.selected_el_list = [];
   }
+
+  // this.current_search_result = null;
 
   // NOTE: remove all old scaffolds
   while (this.scaffolds.firstChild) {
