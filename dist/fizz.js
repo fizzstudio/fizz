@@ -154,9 +154,7 @@ function fizz( svgroot ) {
   this.buttons = null;
   this.mode = "draw-dot";
 
-  this.pane_switch = null;
-  this.pane_switch_buttons = null;
-  this.panes = null;
+  this.panes = [];
 
   // file upload variables
 
@@ -293,21 +291,15 @@ fizz.prototype.init = function () {
 
   this.file_input_button.addEventListener("change", bind(this, this.upload_file), false);
   this.file_save_button.addEventListener("click", bind(this, this.save_file), false);
+  this.resize_canvas_checkbox.addEventListener("change", bind(this, this.resize_canvas), false);  
 
-  this.panes = document.querySelectorAll("[role=region]");
-  this.pane_switch = document.querySelector("#pane_switch");
-  this.pane_switch_buttons = this.pane_switch.querySelectorAll("[role=radio]");
-  for (var p = 0, p_len = this.pane_switch_buttons.length; p_len > p; ++p) {
-    var each_pane_switch_button = this.pane_switch_buttons[p];
-    each_pane_switch_button.addEventListener("click", bind(this, this.handle_pane_switch), false );
-  }
+  this.manage_panes();
+
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
 
     // this.active_el.setAttribute("style", this.get_style() );
     // this.selected_el.classList.add("selected");
     // this.selected_el.classList.remove("selected");
-
-  this.resize_canvas_checkbox.addEventListener("change", bind(this, this.resize_canvas), false);  
     
 }
 
@@ -1869,40 +1861,6 @@ fizz.prototype.handle_picker = function (event) {
   this.deactivate_nodes();
 }
 
-fizz.prototype.handle_pane_switch = function (event) {
-  this.reset();
-
-  var target = event.target;
-  this.mode = target.getAttribute("data-mode");
-  var target_id = target.getAttribute("id");
-  // console.log("mode: " + this.mode);
-
-  for (var pb = 0, pb_len = this.pane_switch_buttons.length; pb_len > pb; ++pb) {
-    var each_pane_switch_button = this.pane_switch_buttons[pb];
-
-    if ( each_pane_switch_button === target ) {
-      each_pane_switch_button.setAttribute("aria-checked", "true" );
-    } else {
-      each_pane_switch_button.setAttribute("aria-checked", "false" );
-    }
-  }
-
-  for (var p = 0, p_len = this.panes.length; p_len > p; ++p) {
-    var each_pane = this.panes[p];
-
-    var label_id = each_pane.getAttribute("aria-labelledby");
-
-    if ( label_id === target_id ) {
-      each_pane.setAttribute("aria-current", "true" );
-    } else {
-      each_pane.setAttribute("aria-current", "false" );
-    }
-  }
-
-   // role="region" aria-labelledby="button-create" aria-current="true"
-  this.deactivate_nodes();
-}
-
 fizz.prototype.handle_keys = function (event) {
   var target = event.target;
   var key = event.key;
@@ -1956,6 +1914,23 @@ fizz.prototype.get_style = function ( style_type ) {
                   .replace(/[{}]/g, "");
 
   return style;
+}
+
+
+/*
+// Pane controls
+*/
+
+fizz.prototype.manage_panes = function () {
+  var switches = document.querySelectorAll("[data-role=pane_switch]");
+  var regions = document.querySelectorAll("[role=region]");
+  for (var p = 0, p_len = switches.length; p_len > p; ++p) {
+    var each_switch = switches[p];
+    var each_group = each_switch.getAttribute("data-pane_group");
+    var each_pane = new pane( each_group, each_switch, this );
+
+    this.panes.push( each_pane );
+  }
 }
 
 
@@ -2219,6 +2194,7 @@ fizz.prototype.convertToRelative = function (path) {
   }
   path.setAttribute('d', path.getAttribute('d').replace(/Z/g, 'z'));
 }   
+
 
 
 /*
@@ -2557,6 +2533,66 @@ connector.prototype.find_port = function( sourceports, sourcex, sourcey, targetp
   }
   
   return ports;
+}
+
+
+/* pane object */
+
+function pane( group_id, el, parent_obj ) {
+  this.el              = el;
+  this.id              = this.el.id;
+  this.parent_obj      = parent_obj;
+  this.group_id        = null;
+  this.switch          = null;
+  this.switch_els      = null;
+  this.pane_els        = null;
+  this.active_pane_id  = null;
+  // console.info("fn pane")
+  this.init();
+}
+
+// node.prototype.toString = function() { return 'Node: ' + this.id ;};
+
+pane.prototype.init = function( id ) {
+  this.group_id = this.el.getAttribute("data-pane_group");
+  this.switch_els = this.el.querySelectorAll("[role=radio]");
+  this.pane_els = document.querySelectorAll("[role=region][data-pane_group=" + this.group_id + "]");
+  this.el.addEventListener("click", bind(this, this.handle_pane_switch), false );
+}
+
+
+pane.prototype.handle_pane_switch = function (event) {
+  this.parent_obj.reset();
+
+  var target_el = event.target;
+
+  this.active_pane_id = target_el.getAttribute("data-pane");
+  while (!this.active_pane_id) {
+    target_el = target_el.parentNode;
+    this.active_pane_id = target_el.getAttribute("data-pane");
+  }
+
+  for (var pb = 0, pb_len = this.switch_els.length; pb_len > pb; ++pb) {
+    var each_switch_el = this.switch_els[pb];
+
+    if ( each_switch_el === target_el ) {
+      each_switch_el.setAttribute("aria-checked", "true" );
+    } else {
+      each_switch_el.setAttribute("aria-checked", "false" );
+    }
+  }
+
+  for (var p = 0, p_len = this.pane_els.length; p_len > p; ++p) {
+    var each_pane_el = this.pane_els[p];
+
+    if ( this.active_pane_id === each_pane_el.id ) {
+      each_pane_el.setAttribute("aria-current", "true" );
+    } else {
+      each_pane_el.setAttribute("aria-current", "false" );
+    }
+  }
+
+  this.parent_obj.deactivate_nodes();
 }
 
 
