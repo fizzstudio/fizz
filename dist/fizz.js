@@ -1330,10 +1330,13 @@ fizz.prototype.delete_element = function ( el ) {
     if ( -1 < target_index ) {
       this.elements.splice( target_index, 1 );
     }
+
+    target_obj.element.remove();
+    this.active_el = null;
   }
   
-  this.active_el.parentNode.removeChild( this.active_el );
-  this.active_el = null;
+  // this.active_el.parentNode.removeChild( this.active_el );
+  // this.active_el = null;
 }
 
 fizz.prototype.copy_element = function ( el ) {
@@ -1514,6 +1517,9 @@ fizz.prototype.add_to_canvas_defs = function ( el ) {
 fizz.prototype.select = function ( target_el, multiple ) {
   if ( !target_el ) {
     target_el = this.active_el;
+  } else {
+    // TODO: determine if there's some reason not to make the selected element the active_el
+    this.active_el = target_el;
   }
 
   if ( this.selected_el_list.length 
@@ -2015,6 +2021,8 @@ fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     summary.textContent = el_type;
     details.appendChild( summary );
 
+    this.active_tree_entry.addEventListener("click", bind(this, this.select_tree_entry), false );
+
     /*
     // uncomment when we add toggle buttons to element_treeview items
     var toggle_button = document.createElement("button");
@@ -2127,6 +2135,34 @@ fizz.prototype.update_tree_entry = function ( event ) {
     }
 
   }
+}
+
+
+fizz.prototype.select_tree_entry = function ( event ) {
+  console.log("select_tree_entry")
+  if ( this.element_treeview ) {
+    var target = event.target;
+    console.log("select_tree_entry 1")
+
+    // update related element with new value
+    var tree_item = this.element_treeview.firstElementChild;
+    while ( false === tree_item.contains( target ) ) {
+      tree_item = tree_item.nextElementSibling;
+    }
+
+    if ( tree_item ) {
+      this.active_obj = this.elements.find( match_treeitem, tree_item );
+
+      if ( "delete" == this.mode ) {
+        this.delete_element( this.active_obj.element );
+        // console.log("select_tree_entry")
+      } else {
+        this.select(this.active_obj.element, false);
+      }
+    }
+  }
+
+
 }
 
 

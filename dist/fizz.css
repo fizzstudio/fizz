@@ -620,3 +620,11 @@ svg#fizz {
     pointer-events: all;
   }
 
+
+
+.selected, .active_node {
+  outline: hsla(219, 79%, 66%, 0.8) 3px dashed;
+  /*hsl(219, 79, 66)*/
+}
+  
+
