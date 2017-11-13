@@ -396,48 +396,48 @@ section.pane::-webkit-scrollbar-thumb {
 
 
 /* styles for element treeview */
-ul#treeview {
+ul#element_treeview {
   margin-left: 1rem;
   color: var(--label);
 } 
 
-  ul#treeview,
-  ul#treeview ul.attributes, 
-  ul#treeview ul.child-elements {
+  ul#element_treeview,
+  ul#element_treeview ul.attributes, 
+  ul#element_treeview ul.child-elements {
     list-style-type: none;
     display: block;  
   } 
 
-  ul#treeview ul.attributes, 
-  ul#treeview ul.child-elements {
+  ul#element_treeview ul.attributes, 
+  ul#element_treeview ul.child-elements {
     margin-left: 2rem;
   } 
 
-  ul#treeview li > details {
+  ul#element_treeview li > details {
     margin-bottom: 0.1em;
   }
 
-  ul#treeview li > details > summary {
+  ul#element_treeview li > details > summary {
     font-weight: bold;
   }
 
-  ul#treeview ul.attributes {
+  ul#element_treeview ul.attributes {
     font-size: smaller;
   }
 
-    ul#treeview b.attribute::after {
+    ul#element_treeview b.attribute::after {
      content: ": ";
      font-weight: bold;
     }
 
-    ul#treeview li.selected {
+    ul#element_treeview li.selected {
       outline: none;
       background-color: var(--control);
     }
 
 /*
 uncomment when we add toggle buttons to treeview items
-      ul#treeview > li > details > summary > button {
+      ul#element_treeview > li > details > summary > button {
         display: inline-block;
         padding: 0;
         padding-bottom: 0.5em;

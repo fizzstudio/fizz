@@ -118,7 +118,7 @@ function fizz( svgroot ) {
   this.backdrop = this.root.getElementById("backdrop");
   this.canvas = this.root.getElementById("canvas");
   this.scaffolds = this.root.getElementById("scaffolds");
-  this.treeview = document.getElementById("treeview");
+  this.element_treeview = document.getElementById("element_treeview");
 
   this.library = this.root.getElementById("fizz_library");
   this.canvas_defs = null;
@@ -164,6 +164,12 @@ function fizz( svgroot ) {
   this.file_input_button = document.getElementById( "file_input_button" );
   this.file_save_button = document.getElementById( "file_save_button" );
   this.resize_canvas_checkbox = document.getElementById( "resize_canvas_checkbox" );
+
+  // find and replace
+  this.search = document.getElementById( "search" );
+  this.search_submit = document.getElementById( "search_submit" );
+  this.search_replace = document.getElementById( "search-replace" );
+  this.search_replace_submit = document.getElementById( "search-replace_submit" );
 
   // coordinate variables
   this.coords = this.root.createSVGPoint();
@@ -262,8 +268,8 @@ fizz.prototype.init = function () {
   this.root.addEventListener("mouseup", bind(this, this.drop), false );
   this.root.parentNode.addEventListener("input", bind(this, this.handle_text_input), false );
 
-  this.treeview.addEventListener("keyup", bind(this, this.handle_keys), false );
-  this.treeview.addEventListener("keydown", bind(this, this.handle_keys), false );
+  this.element_treeview.addEventListener("keyup", bind(this, this.handle_keys), false );
+  this.element_treeview.addEventListener("keydown", bind(this, this.handle_keys), false );
 
   this.buttons = document.querySelectorAll("button");
   for (var b = 0, bLen = this.buttons.length; bLen > b; ++b) {
@@ -294,6 +300,11 @@ fizz.prototype.init = function () {
   this.resize_canvas_checkbox.addEventListener("change", bind(this, this.resize_canvas), false);  
 
   this.manage_panes();
+
+  // find and replace
+  this.search_submit.addEventListener("click", bind(this, this.handle_search), false);
+  this.search_replace_submit.addEventListener("click", bind(this, this.handle_search), false);
+
 
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
 
@@ -384,7 +395,7 @@ fizz.prototype.insert_svg = function () {
   file_content = file_content.substring( svg_start );
 
   // insert SVG file into HTML page
-  // TODO: parse and insert each element, including them in treeview
+  // TODO: parse and insert each element, including them in element_treeview
   // TODO: change from innerHTML, which removes and overwrites all previous content
   this.canvas.innerHTML = file_content;
 
@@ -882,7 +893,7 @@ fizz.prototype.add_to_container = function ( el_list ) {
         && !each_el.contains(this.active_container) ) {
         this.active_container.appendChild( each_el );
 
-        // redraw treeview     
+        // redraw element_treeview     
         var each_obj = this.elements.find( match_element, each_el );
         each_obj.parent = each_el.parentNode;
         container_tree.appendChild( each_obj.tree_item.element );
@@ -985,7 +996,7 @@ fizz.prototype.grab = function (event) {
           // TODO: apply transform to whole group when dragging? opt-out key to just move single member?
 
           // TODO: "add-group" mode: clicking on element adds it to current group? or creates new group?
-          // TODO: add option buttons to treeview items to hide/show, and to set 
+          // TODO: add option buttons to element_treeview items to hide/show, and to set 
           //       active group (target for where new items will be created)
         } 
       }
@@ -1437,8 +1448,8 @@ fizz.prototype.update_element = function ( el ) {
 
 fizz.prototype.remove_element = function () {
     // console.log("remove_element");
-  // delete treeview item
-  // delete all child treeview items
+  // delete element_treeview item
+  // delete all child element_treeview items
   this.elements
 }
 
@@ -1446,8 +1457,8 @@ fizz.prototype.get_element = function ( el, id ) {
     // console.log("get_element");
   // highlight element
   // bring element into view
-  // highlight treeview item
-  // expand/navigate treeview to item 
+  // highlight element_treeview item
+  // expand/navigate element_treeview to item 
 
   this.elements
 
@@ -1874,6 +1885,40 @@ fizz.prototype.handle_keys = function (event) {
 
 }
 
+fizz.prototype.handle_search = function ( event ) {
+  var target = event.target;
+
+  var search_str = this.search.value;
+
+  if ( search_str ) {
+    for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
+      var each_obj = this.elements[ e ];
+
+      // TODO: search across all elements and attributes and text content, not just 'id'
+      if ( each_obj.id === search_str ) {
+        var tree_item = each_obj.tree_item;
+        if ( tree_item ) {
+          tree_item.element.classList.add("selected");
+          tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
+
+          // check for replace
+          if (target === this.search_replace_submit) {
+            var replace_str = this.search_replace.value;
+            if ( replace_str ) {
+              var attr = "id";
+              var attr_value_el = tree_item.element.querySelector("[data-attribute=" + "id" + "] > span.value");
+              attr_value_el.textContent = replace_str;  
+              var blur_event = new FocusEvent("blur");
+              attr_value_el.dispatchEvent(blur_event);
+            }
+          }
+        }
+      }
+    }  
+  }
+}
+
+
 fizz.prototype.handle_ = function (event) {
 }
 
@@ -1935,14 +1980,14 @@ fizz.prototype.manage_panes = function () {
 
 
 /*
-// Treeview
+// Element Treeview
 */
 
 fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     // console.log("add_tree_entry");
-  if ( this.treeview ) {
+  if ( this.element_treeview ) {
     if ( !tree_container ) {
-      tree_container = this.treeview;
+      tree_container = this.element_treeview;
     } 
 
     // var attrs = document.getElementById("myId").attributes;
@@ -1964,7 +2009,7 @@ fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     details.appendChild( summary );
 
     /*
-    // uncomment when we add toggle buttons to treeview items
+    // uncomment when we add toggle buttons to element_treeview items
     var toggle_button = document.createElement("button");
     toggle_button.textContent = "●";
     summary.appendChild( toggle_button );
@@ -1990,7 +2035,7 @@ fizz.prototype.add_tree_entry = function ( el, tree_container ) {
 
 
 fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
-  if ( this.treeview && el && parent_node ) {
+  if ( this.element_treeview && el && parent_node ) {
     var list = document.createElement("ul");
     list.classList.add("attributes");
 
@@ -2003,6 +2048,7 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
         && "contenteditable" != item.name ) {
         if ( item.value && "" != item.value ) {
           var list_item = document.createElement("li");
+          list_item.setAttribute( "data-attribute", item.name );
           // list_item.textContent = item.name + ": " + item.value;
 
           var name_el = document.createElement("b");
@@ -2047,11 +2093,11 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
 fizz.prototype.update_tree_entry = function ( event ) {
   // updates element when tree entry is modified
     // console.log("update_tree_entry");
-  if ( this.treeview ) {
+  if ( this.element_treeview ) {
     var target = event.target;
 
     // update related element with new value
-    var tree_item = this.treeview.firstElementChild;
+    var tree_item = this.element_treeview.firstElementChild;
     while ( false === tree_item.contains( target ) ) {
       tree_item = tree_item.nextElementSibling;
     }
@@ -2065,6 +2111,11 @@ fizz.prototype.update_tree_entry = function ( event ) {
         var attr_value = target.textContent;
         this.active_obj.element.setAttribute(attr, attr_value);
         // TODO: add animated transition flash around changing element
+
+        if ("id" === attr) {
+          // TODO: if changing id, make sure it isn't a duplicate id
+          this.active_obj.id = attr_value;
+        }
       }
     }
 
