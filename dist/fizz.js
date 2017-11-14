@@ -158,7 +158,6 @@ function fizz( svgroot ) {
   this.panes = [];
   this.active_workspace = "workspace_create";
 
-
   // file upload variables
   this.file = null;
   this.file_type = null;
@@ -174,9 +173,16 @@ function fizz( svgroot ) {
   this.search_replace_button = document.getElementById( "search_replace_button" );
   this.current_search_result = null;
 
+  // zoom
+  this.zoom_in_button = document.getElementById( "zoom_in_button" );
+  this.zoom_out_button = document.getElementById( "zoom_out_button" );
+
   // coordinate variables
   this.coords = this.root.createSVGPoint();
   this.originpoint = this.root.createSVGPoint();
+
+  this.x_coord_display = document.getElementById( "x_coord_display" );
+  this.y_coord_display = document.getElementById( "y_coord_display" );
 
   // styles
 
@@ -308,6 +314,10 @@ fizz.prototype.init = function () {
   this.search_button.addEventListener("click", bind(this, this.handle_search), false);
   this.search_replace_button.addEventListener("click", bind(this, this.handle_search), false);
   this.search_input.addEventListener("change", bind(this, this.reset_search), false);
+
+  // zoom
+  this.zoom_in_button.addEventListener("click", bind(this, this.handle_zoom), false);
+  this.zoom_out_button.addEventListener("click", bind(this, this.handle_zoom), false);
 
 
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
@@ -1039,6 +1049,8 @@ fizz.prototype.drag = function (event) {
   event.stopPropagation();
 
   this.coords = local_coords(event, this.backdrop, this.root);
+  this.x_coord_display.textContent = this.coords.x;
+  this.y_coord_display.textContent = this.coords.y;
 
   if ( "drag" == this.mode ) {
     // TODO: refactor for multiple selections
@@ -2010,6 +2022,12 @@ fizz.prototype.replace_search_result = function ( attr_value_el, search_str, rep
 
 fizz.prototype.reset_search = function ( event ) {
   this.current_search_result = null;
+}
+
+
+fizz.prototype.handle_zoom = function (event) {
+  var target = event.target;
+  console.info("handle_zoom", target);
 }
 
 

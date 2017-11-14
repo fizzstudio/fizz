@@ -564,9 +564,21 @@ ul[role="listbox"] li[aria-selected="true"] {
 }
 
 
+/* footer */
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
 /* search and replace box*/
 
 #search_replace_group {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -603,6 +615,37 @@ ul[role="listbox"] li[aria-selected="true"] {
       color: var(--control_reverse);
     }
 
+
+section#zoom_controls {
+  flex: 0 0 auto;
+  /*align-self: flex-end;*/
+  /*font-size: 1.3rem;*/
+  /*color: var(--control_reverse);*/
+}
+
+  section#zoom_controls button  {
+    font-family: Roboto, sans-serif;
+    background-color: var(--control);
+    color: var(--control_reverse);
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0.3rem;
+    border: none;
+    font-size: 1.5rem;
+    text-decoration: none;
+  }
+
+
+section#coordinates_display {
+  flex: 0 0 auto;
+  font-size: 1.3rem;
+  color: var(--control_reverse);
+}
+
+  section#coordinates_display ul {
+    list-style: none;
+    width: 5.5rem;
+  }
 
 /*
 SVG 
