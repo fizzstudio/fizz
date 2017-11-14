@@ -129,6 +129,7 @@ function fizz( svgroot ) {
   this.active_el = null;
   this.active_obj = null;
   this.active_tree_entry = null;
+  this.active_tree_property = null;
   this.active_container = null; // containers are group, defs, svg, symbol, etc.
 
   this.active_width = null;
@@ -1517,13 +1518,15 @@ fizz.prototype.add_to_canvas_defs = function ( el ) {
 
 
 
-fizz.prototype.select = function ( target_el, multiple ) {
+fizz.prototype.select = function ( target_el, multiple, can_deselect_self ) {
   if ( !target_el ) {
     target_el = this.active_el;
   } else {
     // TODO: determine if there's some reason not to make the selected element the active_el
     this.active_el = target_el;
   }
+
+  // TODO: stop toggling selections from treeview
 
   if ( this.selected_el_list.length 
     && target_el.classList.contains("selected") ) {
@@ -1882,6 +1885,11 @@ fizz.prototype.handle_picker = function (event) {
   this.deactivate_nodes();
 }
 
+fizz.prototype.handle_carousel = function (event) {
+  var target = event.target;
+  // TODO: make symbol picker into a carousel, with prev/next buttons and the active symbol in the center
+}
+
 fizz.prototype.handle_keys = function (event) {
   var target = event.target;
   var key = event.key;
@@ -1899,60 +1907,96 @@ fizz.prototype.handle_search = function ( event ) {
   var target = event.target;  
 
   var search_str = this.search_input.value;
+  var replace_str = this.search_replace_input.value;
 
   if ( search_str ) {
     // start next search after current search selection
-    var is_next_item = true;
+    var is_continue = true;
     var is_replace_current = true;
+    var is_reset_search_loop = false;
+
     if (this.current_search_result) {
       var last_obj = this.elements[this.elements.length - 1];
       if (!last_obj.tree_item.element.contains( this.current_search_result )) {
-        is_next_item = false;
+        is_continue = false;
       }
 
       // if replace, replace current item, not next one
       if (target === this.search_replace_button) {
-        var replace_str = this.search_replace_input.value;
         this.replace_search_result( this.current_search_result, search_str, replace_str ); 
         is_replace_current = false;
       }
     }
 
+    // var is_last_match = false;
     for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
       var each_obj = this.elements[ e ];
-      if (!is_next_item) {
+
+      // var is_current_match = false;
+      if (!is_continue) {
         if (each_obj.tree_item.element.contains( this.current_search_result )) {
-          is_next_item = true;
-        }
-      } else {
-        var tree_item = each_obj.tree_item;
-
-        // search across all elements, attributes, and text content for a matching string
-        var attr_value_els = tree_item.element.querySelectorAll("[data-attribute] > span.value");
-        for (var a = 0, a_len = attr_value_els.length; a_len > a; ++a) {
-          var each_attr_value_el = attr_value_els[ a ];
-          var val = each_attr_value_el.textContent;
-          if (-1 != val.indexOf(search_str)) {
-            var attr = each_attr_value_el.parentNode.getAttribute("data-attribute");
-
-            // TODO: highlight which value in object is current selection (e.g. id=circle-100, x=100, y=100)
-            // TODO: account for multiple matches within a single item (e.g. id=circle-100, x=100, y=100)
-
-            this.current_search_result = each_attr_value_el;
-
-            this.select(each_obj.element, false);
-
-            // check for replace
-            if (is_replace_current && target === this.search_replace_button) {
-              var replace_str = this.search_replace_input.value;
-              this.replace_search_result( each_attr_value_el, search_str, replace_str ); 
-            }
-
-            return;
-          }
+          // is_current_match = true;
+          is_continue = true;
         }
       }
+
+      if (is_continue) {
+        var match_el = this.match_search_str( each_obj, search_str );
+        if (match_el) {
+          var attr = match_el.parentNode.getAttribute("data-attribute");
+
+          // TODO: highlight which value in object is current selection (e.g. id=circle-100, x=100, y=100)
+          // TODO: account for multiple matches within a single item (e.g. id=circle-100, x=100, y=100)
+
+          this.current_search_result = match_el;
+          var click_event = new MouseEvent("click", { bubbles: true });
+          this.current_search_result.dispatchEvent(click_event);
+
+          // check for replace
+          if (is_replace_current && target === this.search_replace_button) {
+            this.replace_search_result( this.current_search_result, search_str, replace_str ); 
+          }
+
+          return;        
+        } // else if (is_current_match) {
+          // is_last_match = true;
+        // }
+      }
     }  
+
+    // TODO: make sure we don't get into a stopped loop if there's only one object with matches,
+    //       but it has multiple matches
+    // is_reset_search_loop
+    // if (is_last_match) {
+    //   this.current_search_result = null;
+    // }
+  }
+}
+
+fizz.prototype.match_search_str = function ( obj, search_str ) {
+  // search across all elements, attributes, and text content for a matching string
+  // TODO: include text content in search
+
+  var is_continue = true;
+  if ( this.current_search_result 
+    && obj.tree_item.element.contains( this.current_search_result )) {
+    is_continue = false;
+  }
+
+  var attr_value_els = obj.tree_item.element.querySelectorAll("[data-attribute] > span.value");
+  for (var a = 0, a_len = attr_value_els.length; a_len > a; ++a) {
+    var each_attr_value_el = attr_value_els[ a ];
+    if (this.current_search_result === each_attr_value_el) {
+      is_continue = true;
+      continue;
+    }
+
+    if (is_continue) {
+      var val = each_attr_value_el.textContent;
+      if (-1 != val.indexOf(search_str)) {
+        return each_attr_value_el;
+      }      
+    }
   }
 }
 
@@ -2101,6 +2145,7 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
         if ( item.value && "" != item.value ) {
           var list_item = document.createElement("li");
           list_item.setAttribute( "data-attribute", item.name );
+          list_item.addEventListener("click", bind(this, this.select_tree_property), false );
           // list_item.textContent = item.name + ": " + item.value;
 
           var name_el = document.createElement("b");
@@ -2176,10 +2221,10 @@ fizz.prototype.update_tree_entry = function ( event ) {
 
 
 fizz.prototype.select_tree_entry = function ( event ) {
-  console.log("select_tree_entry")
+  // console.log("select_tree_entry")
   if ( this.element_treeview ) {
     var target = event.target;
-    console.log("select_tree_entry 1")
+    // console.log("select_tree_entry 1")
 
     // update related element with new value
     var tree_item = this.element_treeview.firstElementChild;
@@ -2189,6 +2234,11 @@ fizz.prototype.select_tree_entry = function ( event ) {
 
     if ( tree_item ) {
       this.active_obj = this.elements.find( match_treeitem, tree_item );
+
+      if ( this.active_tree_property 
+        && !this.active_obj.tree_item.element.contains(this.active_tree_property) ) {
+        this.active_tree_property.classList.remove("selected");
+      }
 
       if ( "delete" == this.mode ) {
         this.delete_element( this.active_obj.element );
@@ -2200,6 +2250,20 @@ fizz.prototype.select_tree_entry = function ( event ) {
   }
 
 
+}
+
+
+fizz.prototype.select_tree_property = function ( event ) {
+  // TODO: work this into other selection mechanisms 
+  // console.log(target)  
+  if ( this.element_treeview ) {
+    if ( this.active_tree_property ) {
+      this.active_tree_property.classList.remove("selected");
+    }
+
+    this.active_tree_property = event.currentTarget;
+    this.active_tree_property.classList.add("selected");
+  }
 }
 
 

@@ -31,6 +31,37 @@
         <main>
           <section id="drawing-area" contenteditable="true">
             <svg id="fizz">
+
+            <style>
+              .icon_bg {
+                fill: none; 
+                stroke: none;
+                pointer-events: all;
+              }
+            </style>
+            <defs>
+              <svg id="treelist-icon" viewBox="0 0 100 100">
+                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                <path d="M20,17 H70 V32 H20 Z M35,42 H85 V58 H35 Z M35,67 H85 V82 H35 Z"/>
+              </svg>
+
+              <svg id="io-icon" viewBox="0 0 100 100">
+                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                <path d="M23,60 V35 H5 L35,10 L65,35 H47 V60 Z M77,40 V65 H95 L65,90 L35,65 H53 V40 Z"/>
+              </svg>
+
+              <svg id="graph-icon" viewBox="0 0 100 100">
+                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                <path d="M49.9,32.4 A20,20 0 1,0 35,49.5 L44.3,72.2 A10,10 0 1,0 49,70.1 L39.7,47.6 A20,20 0 0,0 43.95,44.3 L73.4,67.9 A7,7 0 1,0 76.5,64 L47.1,40.4 A20,20 0 0,0 48.7,37.2 L60,40.1 A10,10 0 1,0 61.2,35.2 Z M30,25 A5,5 0 1,1 30,35 A5,5 0 0,1 30,25"/>
+              </svg>
+
+              <svg id="data-icon" viewBox="0 0 100 100">
+                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                <path d="M15,20 A20,6 0 0,1 85,20 V30 A20,6 0 1,1 15,30 Z M15,35 A20,6 0 1,0 85,35 V55 A20,6 0 1,1 15,55 Z M15,60 A20,6 0 1,0 85,60 V80 A20,6 0 1,1 15,80 Z"/>
+              </svg>
+
+            </defs>
+
               <style type="text/css"> 
                 #endArrow {
                   fill: blue;
@@ -172,8 +203,9 @@
 
             <details class="controls" open>
               <summary>symbols</summary> 
-              <div>
-                <ul id="colors" role="listbox" data-type="symbol" tabindex="1">
+              <div class="carousel">
+                <!-- <button id="carousel_previous_button" class="carousel">previous</button> -->
+                <ul id="symbols" class="carousel" role="listbox" data-type="symbol" tabindex="1">
                   <li role="option" tabindex="1" aria-selected="true" data-value="person-icon-symbol_template">person</li>
                   <li role="option" tabindex="1" aria-selected="false" data-value="hexagon-icon-symbol_template">hexagon</li>
                   <li role="option" tabindex="1" aria-selected="false" data-value="boom-icon-symbol_template">boom</li>
@@ -183,6 +215,7 @@
                   <li role="option" tabindex="1" aria-selected="false" data-value="gear-icon-symbol_template">gear</li>
                   <li role="option" tabindex="1" aria-selected="false" data-value="gear2-icon-symbol_template">gear2</li>
                 </ul>
+                <!-- <button id="carousel_next_button" class="carousel">next</button> -->
               </div>
             </details>
 
@@ -374,41 +407,6 @@
       </section>
 
     </footer>
-  </div>
-
-  <div class="hide">
-    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-      viewBox="0 0 100 100">
-      <style>
-        .icon_bg {
-          fill: none; 
-          stroke: none;
-          pointer-events: all;
-        }
-      </style>
-      <defs>
-        <svg id="treelist-icon" viewBox="0 0 100 100">
-          <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-          <path d="M20,17 H70 V32 H20 Z M35,42 H85 V58 H35 Z M35,67 H85 V82 H35 Z"/>
-        </svg>
-
-        <svg id="io-icon" viewBox="0 0 100 100">
-          <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-          <path d="M23,60 V35 H5 L35,10 L65,35 H47 V60 Z M77,40 V65 H95 L65,90 L35,65 H53 V40 Z"/>
-        </svg>
-
-        <svg id="graph-icon" viewBox="0 0 100 100">
-          <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-          <path d="M49.9,32.4 A20,20 0 1,0 35,49.5 L44.3,72.2 A10,10 0 1,0 49,70.1 L39.7,47.6 A20,20 0 0,0 43.95,44.3 L73.4,67.9 A7,7 0 1,0 76.5,64 L47.1,40.4 A20,20 0 0,0 48.7,37.2 L60,40.1 A10,10 0 1,0 61.2,35.2 Z M30,25 A5,5 0 1,1 30,35 A5,5 0 0,1 30,25"/>
-        </svg>
-
-        <svg id="data-icon" viewBox="0 0 100 100">
-          <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-          <path d="M15,20 A20,6 0 0,1 85,20 V30 A20,6 0 1,1 15,30 Z M15,35 A20,6 0 1,0 85,35 V55 A20,6 0 1,1 15,55 Z M15,60 A20,6 0 1,0 85,60 V80 A20,6 0 1,1 15,80 Z"/>
-        </svg>
-
-      </defs>
-    </svg>    
   </div>
 
 </body>

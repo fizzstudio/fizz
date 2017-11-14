@@ -633,3 +633,51 @@ svg#fizz {
 }
 
 
+
+/* carousel */
+/*
+div.carousel {
+  display: flex;  
+  width: 19rem;
+  height: 15rem;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+  div.carousel button#carousel_previous_button,
+  div.carousel button#carousel_next_button {
+    flex: 0 1 auto;
+    max-width: 1rem;
+    height: 15rem;
+    padding: 0;
+    margin: 0;
+  }
+
+    button#carousel_previous_button {
+      content: "<";
+    }
+
+    button#carousel_next_button {
+      content: ">";
+    }
+
+  ul.carousel {
+    flex: 0 1 auto;
+    width: 15rem;
+    height: 15rem;
+  }
+
+    ul.carousel li {
+      width: 15rem;
+      height: 15rem;
+    }
+
+    ul.carousel li::before {
+      content: url(#person-icon-symbol_template);
+    }
+
+    ul.carousel li[role=option][aria-selected=false] {
+      display: none;
+    }
+*/
