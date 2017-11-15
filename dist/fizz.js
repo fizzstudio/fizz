@@ -176,6 +176,7 @@ function fizz( svgroot ) {
   // zoom
   this.zoom_in_button = document.getElementById( "zoom_in_button" );
   this.zoom_out_button = document.getElementById( "zoom_out_button" );
+  this.zoom_reset_button = document.getElementById( "zoom_reset_button" );
 
   // coordinate variables
   this.coords = this.root.createSVGPoint();
@@ -318,7 +319,7 @@ fizz.prototype.init = function () {
   // zoom
   this.zoom_in_button.addEventListener("click", bind(this, this.handle_zoom), false);
   this.zoom_out_button.addEventListener("click", bind(this, this.handle_zoom), false);
-
+  this.zoom_reset_button.addEventListener("click", bind(this, this.handle_zoom), false);
 
   // console.log( JSON.stringify(this.styles).replace(/"/g, "").replace(/,/g, "; ").replace(/[{}]/g, "") )
 
@@ -1049,8 +1050,9 @@ fizz.prototype.drag = function (event) {
   event.stopPropagation();
 
   this.coords = local_coords(event, this.backdrop, this.root);
-  this.x_coord_display.textContent = this.coords.x;
-  this.y_coord_display.textContent = this.coords.y;
+  this.x_coord_display.textContent = Math.round( this.coords.x * 100 + Number.EPSILON ) / 100;
+  this.y_coord_display.textContent = Math.round( this.coords.y * 100 + Number.EPSILON ) / 100;
+
 
   if ( "drag" == this.mode ) {
     // TODO: refactor for multiple selections
@@ -1820,7 +1822,7 @@ fizz.prototype.handle_buttons = function (event) {
     eachButton.setAttribute("aria-pressed", "false" );
   }
 
-  var target = event.target;
+  var target = event.currentTarget;
   target.setAttribute("aria-pressed", "true" );
   this.mode = target.getAttribute("data-mode");
   // console.log("mode: " + this.mode);
@@ -2026,8 +2028,29 @@ fizz.prototype.reset_search = function ( event ) {
 
 
 fizz.prototype.handle_zoom = function (event) {
-  var target = event.target;
-  console.info("handle_zoom", target);
+  var target = event.target;  
+
+  // TODO: display current scale
+  // TODO: include dropdown for different scales, use this as display?
+  // TODO: allow custom scale factors (store in user prefs)
+  // TODO: allow smooth or instant transitions
+  // TODO: allow zoom from center or a set point, or from top-left
+
+  var current_scale = +this.root.currentScale;
+
+  var scale_factor = 1;
+  var new_scale = 1;
+  if ( this.zoom_in_button === target ) {
+    scale_factor = 1.5;
+    new_scale = current_scale * scale_factor;
+  } else if ( this.zoom_out_button === target ) {
+    scale_factor = 0.75;
+    new_scale = current_scale * scale_factor;
+  } else if ( this.zoom_reset_button ) {
+    new_scale = 1;
+  }
+
+  this.root.currentScale = new_scale;
 }
 
 

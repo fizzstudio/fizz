@@ -32,37 +32,92 @@
           <section id="drawing-area" contenteditable="true">
             <svg id="fizz">
 
-            <style>
-              .icon_bg {
-                fill: none; 
-                stroke: none;
-                pointer-events: all;
-              }
-            </style>
-            <defs>
-              <svg id="treelist-icon" viewBox="0 0 100 100">
-                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                <path d="M20,17 H70 V32 H20 Z M35,42 H85 V58 H35 Z M35,67 H85 V82 H35 Z"/>
-              </svg>
+              <style>
+                .icon_bg {
+                  fill: none; 
+                  stroke: none;
+                  pointer-events: all;
+                }
+              </style>
+              <defs>
+                <svg id="treelist-icon" viewBox="0 0 100 100">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M20,17 H70 V32 H20 Z M35,42 H85 V58 H35 Z M35,67 H85 V82 H35 Z"/>
+                </svg>
 
-              <svg id="io-icon" viewBox="0 0 100 100">
-                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                <path d="M23,60 V35 H5 L35,10 L65,35 H47 V60 Z M77,40 V65 H95 L65,90 L35,65 H53 V40 Z"/>
-              </svg>
+                <svg id="io-icon" viewBox="0 0 100 100">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M23,60 V35 H5 L35,10 L65,35 H47 V60 Z M77,40 V65 H95 L65,90 L35,65 H53 V40 Z"/>
+                </svg>
 
-              <svg id="graph-icon" viewBox="0 0 100 100">
-                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                <path d="M49.9,32.4 A20,20 0 1,0 35,49.5 L44.3,72.2 A10,10 0 1,0 49,70.1 L39.7,47.6 A20,20 0 0,0 43.95,44.3 L73.4,67.9 A7,7 0 1,0 76.5,64 L47.1,40.4 A20,20 0 0,0 48.7,37.2 L60,40.1 A10,10 0 1,0 61.2,35.2 Z M30,25 A5,5 0 1,1 30,35 A5,5 0 0,1 30,25"/>
-              </svg>
+                <svg id="graph-icon" viewBox="0 0 100 100">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M49.9,32.4 A20,20 0 1,0 35,49.5 L44.3,72.2 A10,10 0 1,0 49,70.1 L39.7,47.6 A20,20 0 0,0 43.95,44.3 L73.4,67.9 A7,7 0 1,0 76.5,64 L47.1,40.4 A20,20 0 0,0 48.7,37.2 L60,40.1 A10,10 0 1,0 61.2,35.2 Z M30,25 A5,5 0 1,1 30,35 A5,5 0 0,1 30,25"/>
+                </svg>
 
-              <svg id="data-icon" viewBox="0 0 100 100">
-                <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                <path d="M15,20 A20,6 0 0,1 85,20 V30 A20,6 0 1,1 15,30 Z M15,35 A20,6 0 1,0 85,35 V55 A20,6 0 1,1 15,55 Z M15,60 A20,6 0 1,0 85,60 V80 A20,6 0 1,1 15,80 Z"/>
-              </svg>
+                <svg id="data-icon" viewBox="0 0 100 100">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M15,20 A20,6 0 0,1 85,20 V30 A20,6 0 1,1 15,30 Z M15,35 A20,6 0 1,0 85,35 V55 A20,6 0 1,1 15,55 Z M15,60 A20,6 0 1,0 85,60 V80 A20,6 0 1,1 15,80 Z"/>
+                </svg>
 
-            </defs>
+                <svg id="history-icon" viewBox="0 0 100 100">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M50,10 A20,20 0 1,1 50,90 A20,20 0 1,1 50,10 Z M50,16 A18,18 0 1,0 50,84 A18,18 0 1,0 50,16 Z M47,53 V27 C47,22.5 53,22.5 53,27 V47 H67 C71.5,47 71.5,53 67,53 Z"/> 
+                </svg>
 
-              <style type="text/css"> 
+
+                <svg id="tool_icon_dot" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <circle cx="25" cy="25" r="5"/> 
+                </svg>
+
+                <svg id="tool_icon_circle" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <circle cx="25" cy="25" r="20"/> 
+                </svg>
+
+                <svg id="tool_icon_ellipse" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <ellipse cx="25" cy="25" rx="20" ry="10"/>
+                </svg>
+
+                <svg id="tool_icon_line" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <line x1="10" y1="10" x2="40" y2="40" stroke-width="5"/>
+                </svg>
+
+                <svg id="tool_icon_rectangle" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <rect x="10" y="12" width="30" height="26"/>
+                </svg>
+
+                <svg id="tool_icon_polyline" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <polyline points="10,10 40,40 10,40 40,10" fill="none" stroke-width="5"/>
+                </svg>
+
+                <svg id="tool_icon_polygon" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <polygon points="25,10 10,40 40,40"/>
+                </svg>
+
+                <svg id="tool_icon_path" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M5,25 C22,0 28,50 45,25" fill="none" stroke-width="5"/>
+                </svg>
+
+                <svg id="tool_icon_freehand" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M25,5 C0,20 50,30 25,45" fill="none" stroke-width="5"/>
+                </svg>
+
+                <svg id="tool_icon_use" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <use xlink:href="#person-icon-symbol_template" x="25" y="25" width="40" height="40"/>
+                </svg>  
+              </defs>
+
+                <style type="text/css"> 
                 #endArrow {
                   fill: blue;
                   stroke: blue;
@@ -142,6 +197,8 @@
               <li id="graph_tab" role="radio" aria-checked="false" tabindex="0" data-pane="graph_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#graph-icon"><title>Graphs</title></use></svg></li>
 
               <li id="data_tab" role="radio" aria-checked="false" tabindex="0" data-pane="data_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#data-icon"><title>Data</title></use></svg></li>
+
+              <li id="history_tab" role="radio" aria-checked="false" tabindex="0" data-pane="history_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#history-icon"><title>History</title></use></svg></li>
             </ul>
           </nav>
           <section class="pane" id="element_tree_mode" role="region" data-pane_group="mode" aria-labelledby="elements_tab" aria-current="true">
@@ -180,12 +237,18 @@
           </section>
           <section id="graph_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="graph_tab" aria-current="false">graph mode</section>
           <section id="data_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="data_tab" aria-current="false">data mode</section>
+          <section id="history_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="history_tab" aria-current="false">
+            <button>undo</button>
+            <button>redo</button>
+            <p>TODO: add history treeview here</p>
+          </section>
         </aside> 
 
         <aside id="controls">
           <section id="controls_pane" class="pane">
             <details class="controls" open>
               <summary>shapes</summary>
+<!--
               <div>
                 <button aria-pressed="true" data-mode="draw-dot">dot</button>
                 <button aria-pressed="false" data-mode="draw-circle">circle</button>
@@ -196,8 +259,22 @@
                 <button aria-pressed="false" data-mode="draw-polygon">polygon</button>
                 <button aria-pressed="false" data-mode="draw-path">path</button>
                 <button aria-pressed="false" data-mode="draw-freehand">freehand</button>
-                <!-- <button aria-pressed="false" data-mode="draw-points">points</button> -->
                 <button aria-pressed="false" data-mode="draw-use">use</button>        
+              </div> 
+ -->            
+
+               <div>
+                <button aria-pressed="true" data-mode="draw-dot" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_dot"><title>dot</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-circle" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_circle"><title>circle</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-ellipse" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_ellipse"><title>ellipse</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-line" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_line"><title>line</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-rect" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_rectangle"><title>rectangle</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-polyline" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_polyline"><title>polyline</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-polygon" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_polygon"><title>polygon</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-path" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_path"><title>path</title></use></svg></button>
+                <button aria-pressed="false" data-mode="draw-freehand" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_freehand"><title>freehand</title></use></svg></button>
+                <!-- <button aria-pressed="false" data-mode="draw-points" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_points"><title>points</title></use></svg></button> -->
+                <button aria-pressed="false" data-mode="draw-use" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_use"><title>use</title></use></svg></button>        
               </div> 
             </details>
 
@@ -408,6 +485,7 @@
 
       <section id="zoom_controls">
         <button id="zoom_in_button">+</button>
+        <button id="zoom_reset_button">1</button>
         <button id="zoom_out_button">-</button>
       </section>
 

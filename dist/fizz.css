@@ -305,8 +305,8 @@ header {
     ul#workspace_switch li {
       padding: 0.2rem 0.6rem 0.4rem 0.6rem;
       margin: 0;
-      border: 0.05rem solid var(--icon_active);
-      border-left: 0.05rem solid var(--icon_active);
+      border: 0.05rem solid var(--control_reverse);
+      border-left: 0.05rem solid var(--control_reverse);
       cursor: pointer;
       color: var(--icon_inactive);
       background-color: var(--control);
@@ -322,7 +322,7 @@ header {
 
       ul#workspace_switch li[aria-checked=true] {
         color: var(--control);
-        background-color: var(--icon_active);
+        background-color: var(--control_reverse);
       }
 
 
@@ -458,8 +458,12 @@ uncomment when we add toggle buttons to treeview items
 
 
 /* styles for controls */
-section#controls_pane {
+/*section#controls_pane {
   margin-left: 1rem;
+}*/
+
+aside#controls {
+  padding-left: 1rem;
 }
 
 details.controls {
@@ -493,7 +497,7 @@ aside#controls button {
 }  
 
   aside#controls button:hover, aside#controls button:focus {
-    border: 0.1rem solid var(--icon_active);;
+    border: 0.1rem solid var(--icon_active);
   }
 
   aside#controls button:active {
@@ -505,6 +509,26 @@ aside#controls button {
     background-color: var(--control_reverse);
   }
 
+  aside#controls button > svg.tool_icon {
+    width: 3rem;
+    height: 3rem;
+    fill: var(--icon_inactive);
+    stroke: var(--icon_inactive);
+  }
+
+    aside#controls button[aria-pressed="true"] > svg.tool_icon {
+      fill: var(--icon_active);
+      stroke: var(--icon_active);
+    }
+
+  aside#controls button.tool_icon {
+    width: 3rem;
+    min-width: 3rem;
+    max-width: 3rem;
+    height: 3rem;
+    padding: 0;
+    margin: 0;
+  }
 
 
 
@@ -644,7 +668,7 @@ section#coordinates_display {
 
   section#coordinates_display ul {
     list-style: none;
-    width: 5.5rem;
+    width: 7rem;
   }
 
 /*
