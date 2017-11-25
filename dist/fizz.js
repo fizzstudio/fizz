@@ -14,6 +14,10 @@ function match_treeitem( obj ) {
   return obj.tree_item.element === this;
 }
 
+function match_pageitem( obj ) { 
+  return obj.page_list_el === this;
+}
+
 
 function generate_unique_id( base_id ) {
   var i = 0;
@@ -116,12 +120,19 @@ function setFileInfo ( name, filesize, lastMod ) {
 function fizz( svgroot ) {
   this.root = svgroot;
   this.backdrop = this.root.getElementById("backdrop");
-  this.canvas = this.root.getElementById("canvas");
   this.scaffolds = this.root.getElementById("scaffolds");
-  this.element_treeview = document.getElementById("element_treeview");
+
+  this.pages_group = this.root.getElementById("pages_group");
+  this.inactive_pages_group = this.root.getElementById("inactive_pages_group");
+  this.active_page = null;
+  this.page_list = [];
+  this.active_page_entry = null;
+  this.page_list_el = document.getElementById("page_list_el");
+
+  this.element_treeview_el = document.getElementById("element_treeview_el");
 
   this.library = this.root.getElementById("fizz_library");
-  this.canvas_defs = null;
+  this.page_defs = null;
   
   this.elements = []; // array of object for all graphical elements in the document
   this.connectors = [];
@@ -158,13 +169,18 @@ function fizz( svgroot ) {
   this.panes = [];
   this.active_workspace = "workspace_create";
 
+  this.new_page_button = document.getElementById( "new_page_button" );
+  this.next_page_button = document.getElementById( "next_page_button" );
+  this.previous_page_button = document.getElementById( "previous_page_button" );
+
+
   // file upload variables
   this.file = null;
   this.file_type = null;
   this.file_reader = null;  
   this.file_input_button = document.getElementById( "file_input_button" );
   this.file_save_button = document.getElementById( "file_save_button" );
-  this.resize_canvas_checkbox = document.getElementById( "resize_canvas_checkbox" );
+  this.resize_page_checkbox = document.getElementById( "resize_page_checkbox" );
 
   // find and replace
   this.search_input = document.getElementById( "search_input" );
@@ -184,6 +200,7 @@ function fizz( svgroot ) {
 
   this.x_coord_display = document.getElementById( "x_coord_display" );
   this.y_coord_display = document.getElementById( "y_coord_display" );
+
 
   // styles
 
@@ -273,13 +290,17 @@ function fizz( svgroot ) {
 fizz.prototype.init = function () {
   // this.root.addEventListener("click", bind(this, this.draw), false );
 
+  // var default_page = this.root.getElementById("page-0");
+  // this.set_active_page( null, default_page );
+  this.set_active_page();
+
   this.root.addEventListener("mousedown", bind(this, this.grab), false );
   this.root.addEventListener("mousemove", bind(this, this.drag), false );
   this.root.addEventListener("mouseup", bind(this, this.drop), false );
   this.root.parentNode.addEventListener("input", bind(this, this.handle_text_input), false );
 
-  this.element_treeview.addEventListener("keyup", bind(this, this.handle_keys), false );
-  this.element_treeview.addEventListener("keydown", bind(this, this.handle_keys), false );
+  this.element_treeview_el.addEventListener("keyup", bind(this, this.handle_keys), false );
+  this.element_treeview_el.addEventListener("keydown", bind(this, this.handle_keys), false );
 
   this.buttons = document.querySelectorAll("button");
   for (var b = 0, bLen = this.buttons.length; bLen > b; ++b) {
@@ -305,9 +326,13 @@ fizz.prototype.init = function () {
     eachInput.addEventListener("click", bind(this, this.handle_inputs), false );
   }
 
+  this.new_page_button.addEventListener("click", bind(this, this.create_page), false);
+  this.next_page_button.addEventListener("click", bind(this, this.show_slide), false);
+  this.previous_page_button.addEventListener("click", bind(this, this.show_slide), false);
+
   this.file_input_button.addEventListener("change", bind(this, this.upload_file), false);
   this.file_save_button.addEventListener("click", bind(this, this.save_file), false);
-  this.resize_canvas_checkbox.addEventListener("change", bind(this, this.resize_canvas), false);  
+  this.resize_page_checkbox.addEventListener("change", bind(this, this.resize_page), false);  
 
   this.manage_panes();
 
@@ -327,6 +352,186 @@ fizz.prototype.init = function () {
     // this.selected_el.classList.add("selected");
     // this.selected_el.classList.remove("selected");
     
+}
+
+
+/*
+// page management
+*/
+fizz.prototype.set_active_page = function ( page, el ) {
+  if ( this.active_page && this.active_page.el ) {
+    var new_el = el;
+    if ( !new_el && page ) {
+      new_el = page.el;
+    }
+
+    if  ( this.active_page.el != new_el  ) {
+      // this.active_page.el.setAttribute("data-active", "false");
+      this.inactive_pages_group.appendChild( this.active_page.el );
+    }
+  }
+
+  if ( !page ) {
+    this.active_page = this.create_page( null, el );
+    // var new_page = new Page( "page" );
+    // this.active_page = new Page( el, "page" );
+  } else {
+    this.active_page = page;
+  }
+
+  this.active_page_entry = this.active_page.page_list_el;
+
+  this.active_page.el.setAttribute("data-active", "false");
+  this.pages_group.appendChild( this.active_page.el );
+
+  // console.info(this.active_page)
+}
+
+
+fizz.prototype.create_page = function ( event, el ) {
+  var page = new Page( el, "page" );
+  this.pages_group.appendChild( page.el );
+  this.page_list.push( page );
+  this.add_page_list_entry( page );
+
+  this.set_active_page( page );
+
+  return page;
+}
+
+
+fizz.prototype.resize_page = function ( event, width, height ) {
+  if (!width || !height) {
+    var page_bbox = this.active_page.el.getBBox();
+
+    if (!width) {
+      if ( this.active_width ) {
+        width = this.active_width;
+      } else {
+        // get page bbox
+        width = page_bbox.width;
+      }
+    }
+
+    if (!height) {
+      if ( this.active_height ) {
+        height = this.active_height;
+      } else {
+        // get page bbox
+        height = page_bbox.height;
+      }
+    }  
+  }
+
+  // checkbox to match page image size to raster; if checkbox changed, change viewbox to match
+  var resize_page = this.resize_page_checkbox.checked;
+  if (resize_page && 0 < width && 0 < height) {
+    this.active_page.el.setAttribute("viewBox", "0 0 " + width + " " + height);
+  } else {
+    // TODO: store default viewbox
+    // TODO: define way to set viewbox, keep list of viewbox states, maybe as array of states indexed by target element 
+    this.active_page.el.removeAttribute("viewBox");
+  }
+}
+
+
+/*
+// Pages list view
+*/
+
+fizz.prototype.add_page_list_entry = function ( page ) {
+    // console.log("add_tree_entry");
+  if ( this.page_list_el ) {
+
+    // this.active_page_entry = document.createElement("li");
+    var li = document.createElement("li");
+    li.setAttribute( "class", "page_thumbnail" );
+
+    var thumbnail = document.createElementNS(this.svgns, "svg");
+    var thumbnail_ref = document.createElementNS(this.svgns, "use");
+    thumbnail_ref.setAttributeNS(this.xlinkns, "href", "#" + page.id);
+    thumbnail.appendChild( thumbnail_ref );
+
+    li.appendChild( thumbnail );
+
+    var label = document.createElement("p");
+    label.textContent = page.title;
+    li.appendChild( label );
+
+    this.page_list_el.appendChild( li );
+
+    page.page_list_el = li;
+
+    this.page_list_el.addEventListener("click", bind(this, this.select_page_entry), false );
+    this.page_list_el.scrollIntoView( {block: "end", behavior: "smooth"} );
+  }
+}
+
+fizz.prototype.select_page_entry = function ( event ) {
+  // console.log("select_tree_entry")
+  if ( this.page_list_el ) {
+    var target = event.target;
+
+    var page_item = this.page_list_el.firstElementChild;
+    while ( false === page_item.contains( target ) ) {
+      page_item = page_item.nextElementSibling;
+    }
+
+    if ( page_item ) {
+      var page = this.page_list.find( match_pageitem, page_item );
+
+      if (page) {
+
+        // TODO: show page list selection
+
+        // if ( this.active_tree_property 
+        //   && !this.active_obj.tree_item.element.contains(this.active_tree_property) ) {
+        //   this.active_tree_property.classList.remove("selected");
+        // }
+
+        if ( "delete" == this.mode ) {
+          // TODO: delete page
+
+          // this.delete_element( this.active_obj.element );
+          // console.log("select_tree_entry")
+        } else {
+          // this.select(this.active_obj.element, false);
+          this.set_active_page( page );
+        }
+      }
+    }
+  }
+}
+
+
+fizz.prototype.show_slide = function (event) {
+  var target = event.target;
+
+  var p = 0;
+  var p_len = this.page_list.length;
+  for (; p_len > p; ++p) {
+    var each_page = this.page_list[p];
+    if ( this.active_page === each_page ) {
+      break;
+    }
+  } 
+
+  if ( this.next_page_button === target ) {
+    p++;
+
+    if (p_len <= p) {
+      p = 0;
+    }
+  } else if ( this.previous_page_button === target ) {
+    p--;  
+
+    if (0 > p) {
+      p = p_len - 1;
+    }
+  }
+
+  var new_page = this.page_list[p];
+  this.set_active_page( new_page );
 }
 
 
@@ -371,7 +576,7 @@ fizz.prototype.insert_raster = function () {
     this.active_width = img.width;
     this.active_height = img.height;
 
-    this.resize_canvas();
+    this.resize_page();
 
     // console.info("width: ", width, "height: ", height ); // image is loaded; sizes are available
 
@@ -410,9 +615,9 @@ fizz.prototype.insert_svg = function () {
   file_content = file_content.substring( svg_start );
 
   // insert SVG file into HTML page
-  // TODO: parse and insert each element, including them in element_treeview
+  // TODO: parse and insert each element, including them in element_treeview_el
   // TODO: change from innerHTML, which removes and overwrites all previous content
-  this.canvas.innerHTML = file_content;
+  this.active_page.el.innerHTML = file_content;
 
   
 //     this.lang = "en-US";
@@ -432,7 +637,7 @@ fizz.prototype.reset_file_input = function () {
 
 
 fizz.prototype.save_file = function () {
-  var content = new XMLSerializer().serializeToString( this.canvas );
+  var content = new XMLSerializer().serializeToString( this.active_page.el );
 
   var filename_input = document.querySelector("#filename_input");
   var filetype_input = document.querySelector("#filetype_input");
@@ -468,42 +673,6 @@ fizz.prototype.save_file = function () {
 }
 
 
-fizz.prototype.resize_canvas = function ( event, width, height ) {
-  if (!width || !height) {
-    var canvas_bbox = this.canvas.getBBox();
-
-    if (!width) {
-      if ( this.active_width ) {
-        width = this.active_width;
-      } else {
-        // get canvas bbox
-        width = canvas_bbox.width;
-      }
-    }
-
-    if (!height) {
-      if ( this.active_height ) {
-        height = this.active_height;
-      } else {
-        // get canvas bbox
-        height = canvas_bbox.height;
-      }
-    }  
-  }
-
-  // checkbox to match canvas image size to raster; if checkbox changed, change viewbox to match
-  var resize_canvas = this.resize_canvas_checkbox.checked;
-  if (resize_canvas && 0 < width && 0 < height) {
-    this.canvas.setAttribute("viewBox", "0 0 " + width + " " + height);
-  } else {
-    // TODO: store default viewbox
-    // TODO: define way to set viewbox, keep list of viewbox states, maybe as array of states indexed by target element 
-    this.canvas.removeAttribute("viewBox");
-  }
-}
-
-
-
 /*
 // draw
 */
@@ -512,10 +681,11 @@ fizz.prototype.draw = function (event) {
   // if ( 0 == event.button ) {
   // }
   if ( this.backdrop == event.target 
-    || this.canvas == event.target.parentNode 
+    || this.active_page.el == event.target.parentNode 
     || this.scaffolds == event.target.parentNode ) {
     // adjust coords
-    this.coords = local_coords(event, this.backdrop, this.root);
+    // this.coords = local_coords(event, this.backdrop, this.root);
+    this.coords = local_coords(event, this.active_page.el, this.root);
     //console.log(event.detail)
 
     if (2 == event.detail) {
@@ -779,7 +949,7 @@ fizz.prototype.draw_freehand = function () {
 fizz.prototype.draw_use = function () {
   var symbol = this.library.querySelector( "#" + this.values["symbol"] );
   var symbol_copy = symbol.cloneNode(true);
-  var symbol_id = this.add_to_canvas_defs( symbol_copy );
+  var symbol_id = this.add_to_page_defs( symbol_copy );
 
   this.active_el = document.createElementNS(this.svgns, "use");
   this.add_element( this.active_el );
@@ -908,7 +1078,7 @@ fizz.prototype.add_to_container = function ( el_list ) {
         && !each_el.contains(this.active_container) ) {
         this.active_container.appendChild( each_el );
 
-        // redraw element_treeview     
+        // redraw element_treeview_el     
         var each_obj = this.elements.find( match_element, each_el );
         each_obj.parent = each_el.parentNode;
         container_tree.appendChild( each_obj.tree_item.element );
@@ -965,7 +1135,7 @@ fizz.prototype.grab = function (event) {
 
       // only grab things in drawing area 
       var target = event.target;
-      if ( this.canvas.contains( target ) ) {
+      if ( this.active_page.el.contains( target ) ) {
         this.active_el = target;
         if ( "select" == this.mode ) {
           var multiple = false;
@@ -976,7 +1146,8 @@ fizz.prototype.grab = function (event) {
         } else if ( "copy" == this.mode ) {
           this.copy_element( this.active_el );
         } else {
-          this.coords = local_coords(event, this.backdrop, this.root);
+          // this.coords = local_coords(event, this.backdrop, this.root);
+          this.coords = local_coords(event, this.active_page.el, this.root);
           this.originpoint = this.coords;
 
           // adjust for existing transforms
@@ -1011,7 +1182,7 @@ fizz.prototype.grab = function (event) {
           // TODO: apply transform to whole group when dragging? opt-out key to just move single member?
 
           // TODO: "add-group" mode: clicking on element adds it to current group? or creates new group?
-          // TODO: add option buttons to element_treeview items to hide/show, and to set 
+          // TODO: add option buttons to element_treeview_el items to hide/show, and to set 
           //       active group (target for where new items will be created)
         } 
       }
@@ -1023,11 +1194,11 @@ fizz.prototype.grab = function (event) {
             // this.active_el = target;
             this.layout_selections.push( target );
           } else {
-            this.layout_selections = this.canvas.querySelectorAll("use");
+            this.layout_selections = this.active_page.el.querySelectorAll("use");
           }
 
-          var path = this.canvas.querySelector("path");
-          // var shapes = this.canvas.querySelectorAll("use");
+          var path = this.active_page.el.querySelector("path");
+          // var shapes = this.active_page.el.querySelectorAll("use");
           this.position_shapes_on_path( path, this.layout_selections );
           break;
 
@@ -1049,9 +1220,10 @@ fizz.prototype.drag = function (event) {
   event.preventDefault();
   event.stopPropagation();
 
-  this.coords = local_coords(event, this.backdrop, this.root);
-  this.x_coord_display.textContent = Math.round( this.coords.x * 100 + Number.EPSILON ) / 100;
-  this.y_coord_display.textContent = Math.round( this.coords.y * 100 + Number.EPSILON ) / 100;
+  // this.coords = local_coords(event, this.backdrop, this.root);
+  this.coords = local_coords(event, this.active_page.el, this.root);
+  this.x_coord_display.textContent = this.coords.x;
+  this.y_coord_display.textContent = this.coords.y;
 
 
   if ( "drag" == this.mode ) {
@@ -1401,9 +1573,9 @@ fizz.prototype.handle_text_input = function ( event ) {
 
 
 fizz.prototype.set_cursor = function ( mode ) {
-  this.canvas.classList = "";
+  this.active_page.el.classList = "";
   if ( mode && "none" != mode ) {
-    this.canvas.classList.add( mode );
+    this.active_page.el.classList.add( mode );
   }
 }
 
@@ -1426,8 +1598,8 @@ fizz.prototype.add_element = function ( el, id, is_copy ) {
       el.setAttribute( "id", id );
     }
 
-    // insert element into canvas
-    this.canvas.appendChild( el );
+    // insert element into page
+    this.active_page.el.appendChild( el );
 
     this.add_tree_entry( el );
 
@@ -1469,8 +1641,8 @@ fizz.prototype.update_element = function ( el ) {
 
 fizz.prototype.remove_element = function () {
     // console.log("remove_element");
-  // delete element_treeview item
-  // delete all child element_treeview items
+  // delete element_treeview_el item
+  // delete all child element_treeview_el items
   this.elements
 }
 
@@ -1478,8 +1650,8 @@ fizz.prototype.get_element = function ( el, id ) {
     // console.log("get_element");
   // highlight element
   // bring element into view
-  // highlight element_treeview item
-  // expand/navigate element_treeview to item 
+  // highlight element_treeview_el item
+  // expand/navigate element_treeview_el to item 
 
   this.elements
 
@@ -1497,13 +1669,13 @@ fizz.prototype.get_elements_by_type = function ( type ) {
 
 
 
-fizz.prototype.add_to_canvas_defs = function ( el ) {
-  if (!this.canvas_defs) {
-    this.canvas_defs = document.createElementNS(this.svgns, "defs");
+fizz.prototype.add_to_page_defs = function ( el ) {
+  if (!this.page_defs) {
+    this.page_defs = document.createElementNS(this.svgns, "defs");
 
     // Insert defs as the first child
     // TODO: remove blank defs if it's not used when file is saved
-    this.canvas.insertBefore(this.canvas_defs, this.canvas.firstChild);
+    this.active_page.el.insertBefore(this.page_defs, this.active_page.el.firstChild);
   }
 
   var el_id = el.id;
@@ -1517,13 +1689,13 @@ fizz.prototype.add_to_canvas_defs = function ( el ) {
     // if symbol, rename id
     new_id = el_id.replace("-symbol_template", "");
 
-    // check if element already exists in canvas defs, like symbol used multiple times
-    preexisting_el = this.canvas_defs.querySelector( "#" + new_id );
+    // check if element already exists in page defs, like symbol used multiple times
+    preexisting_el = this.page_defs.querySelector( "#" + new_id );
   }
 
   if ( !preexisting_el ) {
     el.setAttribute( "id", new_id );
-    this.canvas_defs.appendChild( el );
+    this.page_defs.appendChild( el );
   }
 
   return new_id;
@@ -1703,7 +1875,7 @@ fizz.prototype.update_selection_marquee = function () {
 
 fizz.prototype.get_enclosed_elements = function ( box, deselect ) {
   var enclosed_els = [];
-  var all_els = this.canvas.querySelectorAll("*");
+  var all_els = this.active_page.el.querySelectorAll("*");
   for (var a = 0, a_len = all_els.length; a_len > a; ++a) {
     var each_el = all_els[ a ]; 
 
@@ -1829,7 +2001,7 @@ fizz.prototype.handle_buttons = function (event) {
 
   this.deactivate_nodes();
 
-  // trigger modes that activate immediately without interacting with the canvas
+  // trigger modes that activate immediately without interacting with the page
   this.set_cursor();
   switch (this.mode) {
     case "drag":
@@ -1846,7 +2018,7 @@ fizz.prototype.handle_buttons = function (event) {
 
     case "add-group":
       if ( this.selected_el_list.length ){
-        // activate group button when pressed, without need to click canvas, group selected elements
+        // activate group button when pressed, without need to click page, group selected elements
         this.create_group();
         this.add_to_container( this.selected_el_list );
       }
@@ -2114,15 +2286,16 @@ fizz.prototype.manage_panes = function () {
 }
 
 
+
 /*
-// Element Treeview
+// Element "Treeview"
 */
 
 fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     // console.log("add_tree_entry");
-  if ( this.element_treeview ) {
+  if ( this.element_treeview_el ) {
     if ( !tree_container ) {
-      tree_container = this.element_treeview;
+      tree_container = this.element_treeview_el;
     } 
 
     // var attrs = document.getElementById("myId").attributes;
@@ -2146,7 +2319,7 @@ fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     this.active_tree_entry.addEventListener("click", bind(this, this.select_tree_entry), false );
 
     /*
-    // uncomment when we add toggle buttons to element_treeview items
+    // uncomment when we add toggle buttons to element_treeview_el items
     var toggle_button = document.createElement("button");
     toggle_button.textContent = "●";
     summary.appendChild( toggle_button );
@@ -2172,7 +2345,7 @@ fizz.prototype.add_tree_entry = function ( el, tree_container ) {
 
 
 fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
-  if ( this.element_treeview && el && parent_node ) {
+  if ( this.element_treeview_el && el && parent_node ) {
     var list = document.createElement("ul");
     list.classList.add("attributes");
 
@@ -2231,11 +2404,11 @@ fizz.prototype.add_tree_attributes = function ( el, parent_node ) {
 fizz.prototype.update_tree_entry = function ( event ) {
   // updates element when tree entry is modified
     // console.log("update_tree_entry");
-  if ( this.element_treeview ) {
+  if ( this.element_treeview_el ) {
     var target = event.target;
 
     // update related element with new value
-    var tree_item = this.element_treeview.firstElementChild;
+    var tree_item = this.element_treeview_el.firstElementChild;
     while ( false === tree_item.contains( target ) ) {
       tree_item = tree_item.nextElementSibling;
     }
@@ -2263,12 +2436,12 @@ fizz.prototype.update_tree_entry = function ( event ) {
 
 fizz.prototype.select_tree_entry = function ( event ) {
   // console.log("select_tree_entry")
-  if ( this.element_treeview ) {
+  if ( this.element_treeview_el ) {
     var target = event.target;
     // console.log("select_tree_entry 1")
 
     // update related element with new value
-    var tree_item = this.element_treeview.firstElementChild;
+    var tree_item = this.element_treeview_el.firstElementChild;
     while ( false === tree_item.contains( target ) ) {
       tree_item = tree_item.nextElementSibling;
     }
@@ -2297,7 +2470,7 @@ fizz.prototype.select_tree_entry = function ( event ) {
 fizz.prototype.select_tree_property = function ( event ) {
   // TODO: work this into other selection mechanisms 
   // console.log(target)  
-  if ( this.element_treeview ) {
+  if ( this.element_treeview_el ) {
     if ( this.active_tree_property ) {
       this.active_tree_property.classList.remove("selected");
     }
@@ -2457,7 +2630,7 @@ fizz.prototype.position_shapes_on_path = function ( path, shapes ) {
       }
       var point = path.getPointAtLength( interval );
       // each_shape.setAttribute("transform", "translate(" + point.x + "," + point.y + ")");
-      this.canvas.appendChild( each_shape );
+      this.active_page.el.appendChild( each_shape );
       each_shape.setAttribute("x", point.x );
       each_shape.setAttribute("y", point.y );
     }
@@ -2473,7 +2646,7 @@ fizz.prototype.position_shapes_on_grid = function ( target_el, shapes ) {
 
 fizz.prototype.layout_network = function ( target_el, shapes ) {
       console.info("layout_network")
-    var nodes = this.canvas.querySelectorAll("[role~=node]");
+    var nodes = this.active_page.el.querySelectorAll("[role~=node]");
     for (var n = 0, n_len = nodes.length; n_len > n; ++n) {
       var each_node = nodes[n];
       console.info("node:", each_node)
@@ -2512,7 +2685,7 @@ fizz.prototype.attach_node = function ( node_type ) {
   var nearest_centerpoint = null;  
   var angle = null;  
 
-  var shapes = this.canvas.querySelectorAll("*");
+  var shapes = this.active_page.el.querySelectorAll("*");
   for (var s = 0, s_len = shapes.length; s_len > s; ++s) {
     var each_shape = shapes[s];
     var role = each_shape.getAttribute("role");
@@ -2578,12 +2751,130 @@ if ( nearest_node ) {
 
 fizz.prototype.deactivate_nodes = function () {
   // remove highlights around all connector nodes
-  var active_nodes = this.canvas.querySelectorAll(".active_node");
+  var active_nodes = this.active_page.el.querySelectorAll(".active_node");
   for (var a = 0, a_len = active_nodes.length; a_len > a; ++a) {
     var each_active_node = active_nodes[ a ]; 
     each_active_node.classList.remove("active_node");
     this.update_element( each_active_node );
   }
+}
+
+
+/* project object */
+
+function Project () {
+  this.id           = null;
+  this.name         = null;
+
+  this.owner        = null;
+  this.permissions  = null;
+
+  this.pages        = [];
+
+  this.properties   = null; // TODO: add properties
+
+  this.init();
+}
+
+Project.prototype.init = function() {
+  // TODO: generate project id
+}
+
+
+/* page object */
+
+function Page ( el, type ) {
+  this.el           = el;
+  this.id           = null;
+  this.title        = null;
+
+  // TODO: change global elements and treeview list to page-based
+  this.elements     = null; 
+
+  // TODO: change global defs to page-based
+  this.defs_el      = null; 
+
+  this.page_list_el = null;
+
+
+  this.date_created = Date.now();
+  this.date_changed = null;
+
+  this.owner        = null;
+  this.permissions  = null;
+
+  this.type         = type; // "page", "artboard", "?"
+
+  this.x            = 0;
+  this.y            = 0;
+  this.width        = 0;
+  this.height       = 0;
+  this.viewbox      = 0;
+
+  this.history      = [];
+  this.fork_id      = null; // id of page this was forked from
+
+  this.project_id   = null; // TODO: could belong to more than one project
+  this.order_index  = null; // TODO: could have a different order index in a different project
+
+  this.properties   = null; // TODO: add properties
+
+  this.init();
+}
+
+Page.prototype.init = function() {
+  if ( this.el ) {
+    this.id = this.el.id;
+  }
+
+  if ( !this.id ) {
+    // TODO: generate page id (based on title?)
+    this.id = generate_unique_id( this.type );
+  }
+
+  this.title = this.id;
+
+  // TODO: create page element based on type 
+  var svgns = "http://www.w3.org/2000/svg";
+  if ( "page" == this.type ) {
+    if ( !this.el ) {
+      this.el = document.createElementNS(svgns, "svg");
+      this.el.setAttribute("id", this.id);
+      this.el.setAttribute("xmlns", svgns);
+      // this.el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xlink", "http://www.w3.org/1999/xlink");
+      this.el.setAttribute("class", "page");
+      this.el.setAttribute("x", 0);
+      this.el.setAttribute("y", 0);
+      this.el.setAttribute("viewBox", "0 0 600 600");
+      this.el.setAttribute("preserveAspectRatio", "xMinYMin");
+      this.el.setAttribute("data-active", "true");
+    } else {
+      // TODO: extract metadata
+    }
+  } else if ( "artboard" == this.type ) {
+    // TODO: create artboard
+  }
+
+  this.date_changed = Date.now();
+}
+
+
+/* document object */
+
+function history_item () {
+  this.id           = null;
+  this.timestamp    = null;
+  this.operation    = null;
+  this.el           = null; // element the operation was done on
+  this.prior_state  = null; // element, or attribute value
+
+  // TODO: design with API
+
+  this.init();
+}
+
+history_item.prototype.init = function() {
+  // TODO: generate document id (based on name?)
 }
 
 
@@ -2989,20 +3280,25 @@ function get_centerpoint( el, root ) {
 // Helpers
 */
 
-// adjust coordinates for transforms
-// note that this changed to add the SVG root element
+var epsilon = Number.EPSILON;
+// in case Number.EPSILON isn't supported
+if (!epsilon) {
+  epsilon = 0;
+}
+
+// adjust coordinates for transforms, for a specifics SVG root element
 function local_coords ( event, element, root ) {
   var p = root.createSVGPoint();
-  // p.x = +event.clientX.toFixed(2);
-  // p.y = +event.clientY.toFixed(2);
   p.x = +event.clientX;
   p.y = +event.clientY;
   p = p.matrixTransform(element.getScreenCTM().inverse());
 
   // since SVG only works at one pixel of accuracy, limit the floats to 2 points of precison
-  p.x = +p.x.toFixed(2);
-  p.y = +p.y.toFixed(2);
-  return p;
+  // NOTE: SVGPoint doesn't seem to allow limits to floats! So I use JSON variables instead
+  var x = Math.round( p.x * 100 + epsilon ) / 100;
+  var y = Math.round( p.y * 100 + epsilon ) / 100;
+
+  return {"x": x, "y": y};
 }   
 
 function bind (scope, fn) {

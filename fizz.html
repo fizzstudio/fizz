@@ -65,15 +65,32 @@
                   <path d="M50,10 A20,20 0 1,1 50,90 A20,20 0 1,1 50,10 Z M50,16 A18,18 0 1,0 50,84 A18,18 0 1,0 50,16 Z M47,53 V27 C47,22.5 53,22.5 53,27 V47 H67 C71.5,47 71.5,53 67,53 Z"/> 
                 </svg>
 
+                <svg id="page-icon" viewBox="-15 -10 105 140">0 0 95 120
+                  <!-- <path d="M6,5 H70 L90,25 V114 Q90,115 89,115 H6 Q5,115 5,114 V6 Q5,5 6,5 M90,25 H71 Q70,25 70,24 V5"/> -->
+                  <path d="M6,5 H63 V32 H90 V114 Q90,115 89,115 H6 Q5,115 5,114 V6 Q5,5 6,5 Z
+                           M70,5 V25 H90 Z"/>
+                </svg>
+
+                <svg id="tool_icon_zoom_extents" viewBox="0 0 50 50">
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <circle cx="25" cy="25" r="4"/> 
+                </svg>
+
+                <svg id="tool_icon_crop" viewBox="0 0 32 32">
+                  <title>crop</title>
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M26 8l6-6-2-2-6 6h-14v-6h-4v6h-6v4h6v16h16v6h4v-6h6v-4h-6v-14zM10 10h10l-10 10v-10zM12 22l10-10v10h-10z"></path>
+                </svg>  
+
 
                 <svg id="tool_icon_dot" viewBox="0 0 50 50">
                   <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                  <circle cx="25" cy="25" r="5"/> 
+                  <circle cx="25" cy="25" r="4"/> 
                 </svg>
 
                 <svg id="tool_icon_circle" viewBox="0 0 50 50">
                   <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
-                  <circle cx="25" cy="25" r="20"/> 
+                  <circle cx="25" cy="25" r="18"/> 
                 </svg>
 
                 <svg id="tool_icon_ellipse" viewBox="0 0 50 50">
@@ -115,6 +132,13 @@
                   <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
                   <use xlink:href="#person-icon-symbol_template" x="25" y="25" width="40" height="40"/>
                 </svg>  
+
+                <svg id="tool_icon_folder" viewBox="-7 -7 46 46">
+                  <title>folder</title>
+                  <rect x="0" y="0" width="100%" height="100%" class="icon_bg"/>
+                  <path d="M14 4l4 4h14v22h-32v-26z"></path>
+                </svg>  
+
               </defs>
 
                 <style type="text/css"> 
@@ -177,9 +201,23 @@
                 </svg>
               </defs>
 
-              <rect id="backdrop" x="0" y="0" width="1500" height="1500"/>
+              <g id="backdrop-group"> 
+                <!-- <rect id="backdrop-outer" x="0" y="0" width="1500" height="1500"/> -->
+                <rect id="backdrop" x="0" y="0" width="1000000" height="1000000"/>
+                <rect id="backdrop_inner" x="0" y="0" width="1500" height="1500"/>
+              </g>
 
-              <svg id="canvas" x="0" y="0" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> </svg>
+              <defs id="inactive_pages_group">
+                <!-- 
+                <svg id="page-0" class="page" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                  x="0" y="0" viewBox="0 0 600 600" preserveAspectRatio="xMinYMin" data-active="true"> 
+                  width="1000" height="1000"             
+                  <rect x="0" y="0" width="100%" height="100%" fill="orange"/>                
+                </svg> 
+                -->
+              </defs>
+
+              <g id="pages_group"></g>
 
               <g id="scaffolds"> </g>
 
@@ -192,19 +230,30 @@
             <ul role="radiogroup" data-role="pane_switch" data-pane_group="mode">
               <li id="elements_tab" role="radio" aria-checked="true" tabindex="0" data-pane="element_tree_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#treelist-icon"><title>Elements</title></use></svg></li>
 
+              <li id="history_tab" role="radio" aria-checked="false" tabindex="0" data-pane="history_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#history-icon"><title>History</title></use></svg></li>
+
               <li id="file_io_tab" role="radio" aria-checked="false" tabindex="0" data-pane="file_io_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#io-icon"><title>I/O</title></use></svg></li>
 
-              <li id="graph_tab" role="radio" aria-checked="false" tabindex="0" data-pane="graph_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#graph-icon"><title>Graphs</title></use></svg></li>
+              <li id="pages_tab" role="radio" aria-checked="false" tabindex="0" data-pane="pages_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#page-icon"><title>Pages</title></use></svg></li>
+
+              <li id="projects_tab" role="radio" aria-checked="false" tabindex="0" data-pane="projects_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#tool_icon_folder"><title>Projects</title></use></svg></li>
 
               <li id="data_tab" role="radio" aria-checked="false" tabindex="0" data-pane="data_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#data-icon"><title>Data</title></use></svg></li>
 
-              <li id="history_tab" role="radio" aria-checked="false" tabindex="0" data-pane="history_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#history-icon"><title>History</title></use></svg></li>
+              <li id="graph_tab" role="radio" aria-checked="false" tabindex="0" data-pane="graph_mode" data-pane_group="mode"><svg viewBox="0 0 100 100" class="icon"><use xlink:href="#graph-icon"><title>Graphs</title></use></svg></li>
             </ul>
           </nav>
+
           <section class="pane" id="element_tree_mode" role="region" data-pane_group="mode" aria-labelledby="elements_tab" aria-current="true">
-            <ul id="element_treeview">
+            <ul id="element_treeview_el">
               
             </ul>
+          </section>
+
+          <section id="history_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="history_tab" aria-current="false">
+            <button>undo</button>
+            <button>redo</button>
+            <p>TODO: add history treeview here</p>
           </section>
 
           <section id="file_io_mode" class="pane" 
@@ -220,8 +269,8 @@
                 <output id="new-filesize"> </output>
               </section>
 
-              <label for="resize_canvas_checkbox">Resize Canvas</label>
-              <input type="checkbox" id="resize_canvas_checkbox" value="resize_canvas"> <!--  checked -->
+              <label for="resize_page_checkbox">Resize Page</label>
+              <input type="checkbox" id="resize_page_checkbox" value="resize_page"> <!--  checked -->
             </div>
 
             <div id="export_group" class="control_set">
@@ -235,50 +284,55 @@
                 </section>            
             </div>
           </section>
-          <section id="graph_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="graph_tab" aria-current="false">graph mode</section>
-          <section id="data_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="data_tab" aria-current="false">data mode</section>
-          <section id="history_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="history_tab" aria-current="false">
-            <button>undo</button>
-            <button>redo</button>
-            <p>TODO: add history treeview here</p>
+
+          <section id="pages_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="pages_tab" aria-current="false">
+            <button id="new_page_button">New Page</button>
+            <!--             
+            <button id="next_page_button">Next</button>
+            <button id="previous_page_button">Previous</button>
+            -->
+
+            <!-- <button id="new_artboard_button">New Artboard</button> -->
+            <ul id="page_list_el"> </ul>
           </section>
+
+          <section id="projects_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="projects_tab" aria-current="false">projects mode</section>
+
+          <section id="data_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="data_tab" aria-current="false">data mode</section>
+
+          <section id="graph_mode" class="pane" role="region" data-pane_group="mode" aria-labelledby="graph_tab" aria-current="false">graph mode</section>
         </aside> 
 
         <aside id="controls">
           <section id="controls_pane" class="pane">
             <details class="controls" open>
               <summary>shapes</summary>
-<!--
-              <div>
-                <button aria-pressed="true" data-mode="draw-dot">dot</button>
-                <button aria-pressed="false" data-mode="draw-circle">circle</button>
-                <button aria-pressed="false" data-mode="draw-ellipse">ellipse</button>
-                <button aria-pressed="false" data-mode="draw-line">line</button>
-                <button aria-pressed="false" data-mode="draw-rect">rectangle</button>
-                <button aria-pressed="false" data-mode="draw-polyline">polyline</button>
-                <button aria-pressed="false" data-mode="draw-polygon">polygon</button>
-                <button aria-pressed="false" data-mode="draw-path">path</button>
-                <button aria-pressed="false" data-mode="draw-freehand">freehand</button>
-                <button aria-pressed="false" data-mode="draw-use">use</button>        
-              </div> 
- -->            
-
                <div>
                 <button aria-pressed="true" data-mode="draw-dot" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_dot"><title>dot</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-circle" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_circle"><title>circle</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-ellipse" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_ellipse"><title>ellipse</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-line" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_line"><title>line</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-rect" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_rectangle"><title>rectangle</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-polyline" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_polyline"><title>polyline</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-polygon" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_polygon"><title>polygon</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-path" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_path"><title>path</title></use></svg></button>
+
                 <button aria-pressed="false" data-mode="draw-freehand" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_freehand"><title>freehand</title></use></svg></button>
+
                 <!-- <button aria-pressed="false" data-mode="draw-points" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_points"><title>points</title></use></svg></button> -->
-                <button aria-pressed="false" data-mode="draw-use" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_use"><title>use</title></use></svg></button>        
+
+                <button aria-pressed="false" data-mode="draw-use" class="tool_icon"><svg viewBox="0 0 50 50" class="tool_icon"><use xlink:href="#tool_icon_use"><title>use (symbol)</title></use></svg></button>        
               </div> 
             </details>
 
-            <details class="controls" open>
+            <details class="controls">
               <summary>symbols</summary> 
               <div class="carousel">
                 <!-- <button id="carousel_previous_button" class="carousel">previous</button> -->
@@ -290,7 +344,7 @@
                   <li role="option" tabindex="1" aria-selected="false" data-value="blank-document-icon-symbol_template">blank document</li>
                   <li role="option" tabindex="1" aria-selected="false" data-value="database-icon-symbol_template">database</li>
                   <li role="option" tabindex="1" aria-selected="false" data-value="gear-icon-symbol_template">gear</li>
-                  <li role="option" tabindex="1" aria-selected="false" data-value="gear2-icon-symbol_template">gear2</li>
+                  <!-- <li role="option" tabindex="1" aria-selected="false" data-value="gear2-icon-symbol_template">gear2</li> -->
                 </ul>
                 <!-- <button id="carousel_next_button" class="carousel">next</button> -->
               </div>
@@ -394,6 +448,14 @@
               </div>
             </details>
 
+            <details class="controls" open>
+              <summary>slides</summary> 
+              <div>
+                <button id="next_page_button">Next</button>
+                <button id="previous_page_button">Previous</button>
+              </div>
+            </details>
+
             <details class="controls">
               <summary>mask / clip</summary> 
               <div>
@@ -473,7 +535,7 @@
       <section id="search_replace_group">
         <section id="search_box">
           <!-- <input id="search_input" type="text" placeholder="search for elements or text"> -->
-          <input id="search_input" type="text" placeholder="search for element ids">
+          <input id="search_input" type="text" placeholder="search for element attribute values">
           <button id="search_button">Find</button>
         </section>
 
@@ -487,6 +549,9 @@
         <button id="zoom_in_button">+</button>
         <button id="zoom_reset_button">1</button>
         <button id="zoom_out_button">-</button>
+
+        <button data-mode="zoom-extent"><svg viewBox="0 0 50 50"><use xlink:href="#tool_icon_zoom_extent"><title>zoom extent</title></use></svg></button>
+
       </section>
 
       <section id="coordinates_display">

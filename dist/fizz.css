@@ -396,45 +396,45 @@ section.pane::-webkit-scrollbar-thumb {
 
 
 /* styles for element treeview */
-ul#element_treeview {
+ul#element_treeview_el {
   margin-left: 1rem;
   color: var(--label);
 } 
 
-  ul#element_treeview,
-  ul#element_treeview ul.attributes, 
-  ul#element_treeview ul.child-elements {
+  ul#element_treeview_el,
+  ul#element_treeview_el ul.attributes, 
+  ul#element_treeview_el ul.child-elements {
     list-style-type: none;
     display: block;  
   } 
 
-  ul#element_treeview ul.attributes, 
-  ul#element_treeview ul.child-elements {
+  ul#element_treeview_el ul.attributes, 
+  ul#element_treeview_el ul.child-elements {
     margin-left: 2rem;
   } 
 
-  ul#element_treeview li > details {
+  ul#element_treeview_el li > details {
     margin-bottom: 0.1em;
   }
 
-  ul#element_treeview li > details > summary {
+  ul#element_treeview_el li > details > summary {
     font-weight: bold;
   }
 
-  ul#element_treeview ul.attributes {
+  ul#element_treeview_el ul.attributes {
     font-size: smaller;
   }
 
-    ul#element_treeview ul.attributes li.selected {
+    ul#element_treeview_el ul.attributes li.selected {
       box-shadow: 0 0 0.2rem 0.2rem var(--control_highlight);
     }
 
-    ul#element_treeview b.attribute::after {
+    ul#element_treeview_el b.attribute::after {
      content: ": ";
      font-weight: bold;
     }
 
-  ul#element_treeview li.selected {
+  ul#element_treeview_el li.selected {
     outline: none;
     background-color: var(--control);
   }  
@@ -442,7 +442,7 @@ ul#element_treeview {
 
 /*
 uncomment when we add toggle buttons to treeview items
-      ul#element_treeview > li > details > summary > button {
+      ul#element_treeview_el > li > details > summary > button {
         display: inline-block;
         padding: 0;
         padding-bottom: 0.5em;
@@ -456,11 +456,92 @@ uncomment when we add toggle buttons to treeview items
 
 */ 
 
+/*
+ul#pages_list {
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  width: 100%;
+  background-color: pink;
+}
+
+  ul#pages_list li.page_thumbnail {
+    width: 15rem;
+    height: 15rem;
+    background-color: var(--canvas);
+    outline: 0.1rem solid var(--highlight);
+    overflow: hidden;
+    display: block;
+  }
+
+  ul#pages_list li.page_thumbnail p {
+    color: var(--canvas);
+    color: white;
+  }
+*/
+
+ul#page_list_el {
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  width: 100%;
+  background-color: pink;
+}
+
+  ul#page_list_el li.page_thumbnail {
+    text-align: center;
+    background-color: var(--contrast_light);
+    /*background-color: white;*/
+  }
+
+    ul#page_list_el li.page_thumbnail svg {
+      /*width: 15rem;*/
+      /*height: 15rem;*/
+      overflow: hidden;
+      background-color: var(--canvas);
+      /*background-color: pink;*/
+      outline: 0.1rem solid var(--highlight);
+      /*outline: 0.1rem solid red;*/
+    }
+
+    ul#page_list_el li.page_thumbnail p {
+      color: var(--canvas);
+    }
+
+/*
+ul {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 306px; 
+  width: 200px;
+}
+li {
+  width: 100px;
+  height: 100px;
+  background:
+    linear-gradient(
+      rgba(255,0,0,0.4),
+      rgba(255,0,0,0.4)
+    ),
+    url(http://placekitten.com/g/100/100);
+  color: white;
+  text-align: center;
+  font-size: 50px;
+  line-height: 100px;
+  font-weight: bold;
+  border: 1px solid white;
+}
+
+*/
+
 
 /* styles for controls */
-/*section#controls_pane {
+/*
+section#controls_pane {
   margin-left: 1rem;
-}*/
+}
+*/
 
 aside#controls {
   padding-left: 1rem;
@@ -470,6 +551,7 @@ details.controls {
   outline: 0.1rem solid var(--highlight);
   background: var(--contrast);
   padding-bottom: 0.1rem;
+  margin-left: 1rem;
 }
 
   details.controls > summary {
@@ -527,7 +609,8 @@ aside#controls button {
     max-width: 3rem;
     height: 3rem;
     padding: 0;
-    margin: 0;
+    margin: 0.25rem;
+    display: inline-block;
   }
 
 
@@ -579,13 +662,22 @@ ul[role="picker"] {
 
 /* listbox (symbols) */
 
-ul[role="listbox"] li[aria-selected="false"] {
-  box-shadow: none;
+ul[role="listbox"] {
+  list-style: none;
+  font-size: 1.5rem;
 }
 
-ul[role="listbox"] li[aria-selected="true"] {
-  box-shadow: 0 0 0.2rem 0.2rem var(--control_highlight);
-}
+  ul[role="listbox"] li {
+    padding-left: 0.25rem;
+  }
+
+    ul[role="listbox"] li[aria-selected="false"] {
+      box-shadow: none;
+    }
+
+    ul[role="listbox"] li[aria-selected="true"] {
+      box-shadow: 0 0 0.2rem 0.2rem var(--control_highlight);
+    }
 
 
 /* footer */
@@ -688,11 +780,29 @@ svg#fizz {
   rect#backdrop {
     /*fill: url(#grid100);*/
     /*stroke: var(--control);*/
-    fill: none;
+    fill: gainsboro;
     pointer-events: all;
   }
 
+  rect#backdrop_inner {
+    /*fill: url(#grid100);*/
+    /*stroke: var(--control);*/
+    fill: white;
+    pointer-events: none;
+  }
 
+svg.page {
+  overflow: visible;
+  width: 1000px;
+  height: 1000px;
+
+  background-color: pink;
+  outline: 0.1rem solid var(--highlight);
+}
+
+  svg.page[data-active=false] {
+    display: none;
+  }
 
 .selected, .active_node {
   outline: hsla(219, 79%, 66%, 0.8) 3px dashed;
