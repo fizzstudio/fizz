@@ -384,6 +384,8 @@ fizz.prototype.set_active_page = function ( page, el ) {
   this.active_page.el.setAttribute("data-active", "false");
   this.pages_group.appendChild( this.active_page.el );
 
+  this.update_element_tree()
+
   // console.info(this.active_page)
 }
 
@@ -971,7 +973,7 @@ fizz.prototype.draw_connector = function () {
     this.connectors.push( this.active_connector );
     if ( this.active_obj ) {
       this.active_obj.connector = this.active_connector;
-      // console.log(this.elements)
+      // console.log(this.active_page.elements)
     }
   }
 
@@ -1065,7 +1067,7 @@ fizz.prototype.add_to_container = function ( el_list ) {
       }
     }
 
-    var container_obj = this.elements.find( match_element, this.active_container );
+    var container_obj = this.active_page.elements.find( match_element, this.active_container );
     if (container_obj) {
       var container_tree = container_obj.tree_item.element.querySelector("ul.child-elements");
     }      
@@ -1079,7 +1081,7 @@ fizz.prototype.add_to_container = function ( el_list ) {
         this.active_container.appendChild( each_el );
 
         // redraw element_treeview_el     
-        var each_obj = this.elements.find( match_element, each_el );
+        var each_obj = this.active_page.elements.find( match_element, each_el );
         each_obj.parent = each_el.parentNode;
         container_tree.appendChild( each_obj.tree_item.element );
       }
@@ -1165,7 +1167,7 @@ fizz.prototype.grab = function (event) {
             this.set_cursor( "drag" );
 
             // TODO: refactor for multiple selections
-            this.active_obj = this.elements.find( match_element, this.active_el );
+            this.active_obj = this.active_page.elements.find( match_element, this.active_el );
             // console.log(this.active_obj)
           } 
         }
@@ -1237,7 +1239,7 @@ fizz.prototype.drag = function (event) {
 
       this.active_el.setAttribute("transform", "translate(" + drag_x + "," + drag_y + ")");
 
-      // this.active_obj = this.elements.find( match_element, this.active_el );
+      // this.active_obj = this.active_page.elements.find( match_element, this.active_el );
       //  console.log(this.active_obj)
       // TODO: find and update connectors attached to this element
       if ( this.active_obj ) {
@@ -1511,14 +1513,14 @@ fizz.prototype.end_draw = function (event) {
 }
 
 fizz.prototype.delete_element = function ( el ) {
-  var target_obj = this.elements.find( match_element, el );
+  var target_obj = this.active_page.elements.find( match_element, el );
   if ( target_obj ) {
     var tree_item = target_obj.tree_item.element;
     tree_item.remove();
 
-    var target_index = this.elements.indexOf( target_obj );
+    var target_index = this.active_page.elements.indexOf( target_obj );
     if ( -1 < target_index ) {
-      this.elements.splice( target_index, 1 );
+      this.active_page.elements.splice( target_index, 1 );
     }
 
     target_obj.element.remove();
@@ -1614,9 +1616,9 @@ fizz.prototype.add_element = function ( el, id, is_copy ) {
       }
     };
 
-    this.elements.push( this.active_obj );
+    this.active_page.elements.push( this.active_obj );
     // console.log(this.active_obj);
-    // console.log(this.elements);
+    // console.log(this.active_page.elements);
   }
 }
 
@@ -1631,10 +1633,10 @@ fizz.prototype.update_element = function ( el ) {
     this.add_tree_attributes( el, details );
   } else if ( el ) {
     // for non-active_el, find element tree entry and update details
-    var target_obj = this.elements.find( match_element, el );
+    var target_obj = this.active_page.elements.find( match_element, el );
     var details = target_obj.tree_item.details;
     this.add_tree_attributes( el, details );
-     // console.log(this.elements)
+     // console.log(this.active_page.elements)
   }
 }
 
@@ -1643,7 +1645,7 @@ fizz.prototype.remove_element = function () {
     // console.log("remove_element");
   // delete element_treeview_el item
   // delete all child element_treeview_el items
-  this.elements
+  this.active_page.elements
 }
 
 fizz.prototype.get_element = function ( el, id ) {
@@ -1653,7 +1655,7 @@ fizz.prototype.get_element = function ( el, id ) {
   // highlight element_treeview_el item
   // expand/navigate element_treeview_el to item 
 
-  this.elements
+  this.active_page.elements
 
 }
 
@@ -1663,7 +1665,7 @@ fizz.prototype.get_elements_by_type = function ( type ) {
   // get list of elements by selector
 
 
-  this.elements
+  this.active_page.elements
 
 }
 
@@ -1722,7 +1724,7 @@ fizz.prototype.select = function ( target_el, multiple, can_deselect_self ) {
     if ( 0 <= index ) {
       this.selected_el_list.splice(index, 1);
     }
-    var target_obj = this.elements.find( match_element, target_el );
+    var target_obj = this.active_page.elements.find( match_element, target_el );
     target_obj.tree_item.element.classList.remove("selected");
 
     for (var s = 0, s_len = this.selected_el_list.length; s_len > s; ++s) {
@@ -1744,7 +1746,7 @@ fizz.prototype.select = function ( target_el, multiple, can_deselect_self ) {
       while ( 0 != this.selected_el_list.length ) {
         var each_el = this.selected_el_list.pop();
         each_el.classList.remove("selected");       
-        var each_obj = this.elements.find( match_element, each_el );
+        var each_obj = this.active_page.elements.find( match_element, each_el );
         each_obj.tree_item.element.classList.remove("selected");
       }
     }
@@ -1752,7 +1754,7 @@ fizz.prototype.select = function ( target_el, multiple, can_deselect_self ) {
     // select current active element
     this.selected_el_list.push( target_el );
     target_el.classList.add("selected");
-    var target_obj = this.elements.find( match_element, target_el );
+    var target_obj = this.active_page.elements.find( match_element, target_el );
     target_obj.tree_item.element.classList.add("selected");
     target_obj.tree_item.element.scrollIntoView( {block: "end", behavior: "smooth"} );
 
@@ -1867,7 +1869,7 @@ fizz.prototype.update_selection_marquee = function () {
     // TODO: factor out selection/deselection code into select / deselect functions
     var each_el = this.selected_el_list[ s ];
     each_el.classList.add("selected");
-    var each_obj = this.elements.find( match_element, each_el );
+    var each_obj = this.active_page.elements.find( match_element, each_el );
     each_obj.tree_item.element.classList.add("selected");
   }
 }
@@ -1890,7 +1892,7 @@ fizz.prototype.get_enclosed_elements = function ( box, deselect ) {
         enclosed_els.push(each_el);
       } else if ( deselect ) {
         each_el.classList.remove("selected");
-        var each_obj = this.elements.find( match_element, each_el );
+        var each_obj = this.active_page.elements.find( match_element, each_el );
         each_obj.tree_item.element.classList.remove("selected");
       }         
     }
@@ -2102,7 +2104,7 @@ fizz.prototype.handle_search = function ( event ) {
     var is_reset_search_loop = false;
 
     if (this.current_search_result) {
-      var last_obj = this.elements[this.elements.length - 1];
+      var last_obj = this.active_page.elements[this.active_page.elements.length - 1];
       if (!last_obj.tree_item.element.contains( this.current_search_result )) {
         is_continue = false;
       }
@@ -2115,8 +2117,8 @@ fizz.prototype.handle_search = function ( event ) {
     }
 
     // var is_last_match = false;
-    for (var e = 0, e_len = this.elements.length; e_len > e; ++e) {
-      var each_obj = this.elements[ e ];
+    for (var e = 0, e_len = this.active_page.elements.length; e_len > e; ++e) {
+      var each_obj = this.active_page.elements[ e ];
 
       // var is_current_match = false;
       if (!is_continue) {
@@ -2291,6 +2293,24 @@ fizz.prototype.manage_panes = function () {
 // Element "Treeview"
 */
 
+fizz.prototype.update_element_tree = function () {
+  if ( this.element_treeview_el ) {
+
+    // remove all current tree items
+    while (this.element_treeview_el.firstChild) {
+      this.element_treeview_el.removeChild(this.element_treeview_el.firstChild);
+    }
+
+    for (var e = 0, e_len = this.active_page.elements.length; e_len > e; ++e) {
+      var each_obj = this.active_page.elements[ e ];
+
+      this.element_treeview_el.appendChild( each_obj.tree_item.element );
+
+    }
+  }
+}
+
+
 fizz.prototype.add_tree_entry = function ( el, tree_container ) {
     // console.log("add_tree_entry");
   if ( this.element_treeview_el ) {
@@ -2414,7 +2434,7 @@ fizz.prototype.update_tree_entry = function ( event ) {
     }
 
     if ( tree_item ) {
-      this.active_obj = this.elements.find( match_treeitem, tree_item );
+      this.active_obj = this.active_page.elements.find( match_treeitem, tree_item );
       // console.info(this.active_obj);
 
       if (this.active_obj) {
@@ -2447,7 +2467,7 @@ fizz.prototype.select_tree_entry = function ( event ) {
     }
 
     if ( tree_item ) {
-      this.active_obj = this.elements.find( match_treeitem, tree_item );
+      this.active_obj = this.active_page.elements.find( match_treeitem, tree_item );
 
       if ( this.active_tree_property 
         && !this.active_obj.tree_item.element.contains(this.active_tree_property) ) {
@@ -2721,7 +2741,7 @@ if ( nearest_node ) {
 
     // TODO: only run check on start and end of connector, not each path segment // done?
 
-    var target_obj = this.elements.find( match_element, nearest_node );
+    var target_obj = this.active_page.elements.find( match_element, nearest_node );
     if ( !target_obj.node ) {
       target_obj.node = new node( nearest_node, this.root );
       target_obj.node.x = nearest_centerpoint.x;
@@ -2743,7 +2763,7 @@ if ( nearest_node ) {
       this.active_connector.node2distance = distance;
       this.active_connector.node2.connectors.push( this.active_connector );
     }
-        // console.log(this.elements)    
+        // console.log(this.active_page.elements)    
   }
   return nearest_node;
 }
@@ -2789,7 +2809,7 @@ function Page ( el, type ) {
   this.title        = null;
 
   // TODO: change global elements and treeview list to page-based
-  this.elements     = null; 
+  this.elements     = []; 
 
   // TODO: change global defs to page-based
   this.defs_el      = null; 
